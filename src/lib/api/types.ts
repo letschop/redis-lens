@@ -130,6 +130,56 @@ export type ConnectionState =
   | { status: 'connected'; serverInfo: ServerInfoSummary }
   | { status: 'error'; message: string; retryCount: number };
 
+// ─── Browser Types ───────────────────────────────────────────
+
+/** Redis key type classification. */
+export type RedisKeyType = 'string' | 'list' | 'set' | 'zset' | 'hash' | 'stream' | string;
+
+/** TTL state for a Redis key. */
+export type Ttl =
+  | { type: 'persistent' }
+  | { type: 'seconds'; value: number }
+  | { type: 'missing' };
+
+/** Metadata for a single Redis key. */
+export interface KeyInfo {
+  key: string;
+  keyType: RedisKeyType;
+  ttl: Ttl;
+  sizeBytes?: number;
+  encoding?: string;
+  length?: number;
+}
+
+/** Result of a single SCAN iteration. */
+export interface ScanResult {
+  cursor: number;
+  keys: string[];
+  finished: boolean;
+  scannedCount: number;
+  totalEstimate: number;
+}
+
+/** A node in the key namespace tree. */
+export interface KeyNode {
+  name: string;
+  fullPath: string;
+  isLeaf: boolean;
+  keyType?: RedisKeyType;
+  ttl?: Ttl;
+  childrenCount: number;
+  depth: number;
+}
+
+/** Flattened tree node for virtual scrolling. */
+export interface FlatTreeNode {
+  id: string;
+  node: KeyNode;
+  expanded: boolean;
+  visible: boolean;
+  indent: number;
+}
+
 // ─── Default Factories ─────────────────────────────────────────
 
 export function createDefaultProfile(

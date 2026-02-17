@@ -42,6 +42,14 @@ pub fn run() {
             commands::connection::connection_connect,
             commands::connection::connection_disconnect,
             commands::connection::connection_state,
+            // Browser commands
+            commands::browser::browser_scan_keys,
+            commands::browser::browser_build_tree,
+            commands::browser::browser_get_children,
+            commands::browser::browser_get_keys_info,
+            commands::browser::browser_get_key_info,
+            commands::browser::browser_delete_keys,
+            commands::browser::browser_rename_key,
         ])
         .run(tauri::generate_context!())
         .expect("error while running RedisLens");

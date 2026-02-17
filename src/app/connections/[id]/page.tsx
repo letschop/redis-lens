@@ -3,11 +3,16 @@
 
 import { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Database } from 'lucide-react';
+import { ArrowLeft, Database, Server, HardDrive, Users, MemoryStick } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useConnectionStore } from '@/lib/stores/connection-store';
+import { useBrowserStore } from '@/lib/stores/browser-store';
+import { KeySearchBar } from '@/components/modules/browser/key-search-bar';
+import { KeyTree } from '@/components/modules/browser/key-tree';
+import { ScanProgress } from '@/components/modules/browser/scan-progress';
+import { KeyDetailPanel } from '@/components/modules/browser/key-detail-panel';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,6 +22,7 @@ export default function ConnectionDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { profiles, states, loaded, loadProfiles, setActiveConnection } = useConnectionStore();
+  const { setConnectionId, loadRootKeys, connectionId } = useBrowserStore();
 
   useEffect(() => {
     if (!loaded) {
@@ -30,6 +36,21 @@ export default function ConnectionDetailPage({ params }: PageProps) {
 
   const profile = profiles.find((p) => p.id === id);
   const state = states[id];
+  const isConnected = state?.status === 'connected';
+
+  // Initialize browser store when connected
+  useEffect(() => {
+    if (isConnected && connectionId !== id) {
+      setConnectionId(id);
+    }
+  }, [isConnected, id, connectionId, setConnectionId]);
+
+  // Load root keys once browser store is bound
+  useEffect(() => {
+    if (isConnected && connectionId === id) {
+      void loadRootKeys();
+    }
+  }, [isConnected, connectionId, id, loadRootKeys]);
 
   if (!loaded) {
     return (
@@ -49,65 +70,15 @@ export default function ConnectionDetailPage({ params }: PageProps) {
     );
   }
 
-  const isConnected = state?.status === 'connected';
-
-  return (
-    <main className="container max-w-4xl py-8 px-4 mx-auto">
-      <div className="mb-6">
-        <Button variant="ghost" size="sm" onClick={() => router.push('/')}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Connections
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Database className="h-5 w-5" />
+  if (!isConnected) {
+    return (
+      <main className="container max-w-4xl py-8 px-4 mx-auto">
+        <div className="mb-6">
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Connections
+          </Button>
         </div>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{profile.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            {profile.host}:{profile.port}
-          </p>
-        </div>
-      </div>
-
-      {isConnected && state.status === 'connected' ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Version</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{state.serverInfo.redisVersion}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Keys</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{state.serverInfo.dbSize.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Memory</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{state.serverInfo.usedMemoryHuman}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Clients</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{state.serverInfo.connectedClients}</p>
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">
@@ -122,11 +93,68 @@ export default function ConnectionDetailPage({ params }: PageProps) {
             </Badge>
           </CardContent>
         </Card>
-      )}
+      </main>
+    );
+  }
 
-      <p className="text-sm text-muted-foreground mt-8 text-center">
-        Key browser and data editors will be added in Phase 3.
-      </p>
-    </main>
+  const serverInfo = state.status === 'connected' ? state.serverInfo : null;
+
+  return (
+    <div className="flex flex-col h-screen">
+      {/* Header bar */}
+      <div className="flex items-center gap-3 px-4 py-2 border-b shrink-0">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.push('/')}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
+          <Database className="h-3.5 w-3.5" />
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-sm font-semibold truncate">{profile.name}</h1>
+          <p className="text-xs text-muted-foreground">
+            {profile.host}:{profile.port}
+          </p>
+        </div>
+
+        {/* Server info badges */}
+        {serverInfo && (
+          <div className="flex items-center gap-3 ml-auto text-xs text-muted-foreground">
+            <span className="flex items-center gap-1" title="Redis version">
+              <Server className="h-3 w-3" />
+              {serverInfo.redisVersion}
+            </span>
+            <span className="flex items-center gap-1 tabular-nums" title="Total keys">
+              <HardDrive className="h-3 w-3" />
+              {serverInfo.dbSize.toLocaleString()}
+            </span>
+            <span className="flex items-center gap-1" title="Memory usage">
+              <MemoryStick className="h-3 w-3" />
+              {serverInfo.usedMemoryHuman}
+            </span>
+            <span className="flex items-center gap-1 tabular-nums" title="Connected clients">
+              <Users className="h-3 w-3" />
+              {serverInfo.connectedClients}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Key browser */}
+      <div className="flex flex-1 min-h-0">
+        {/* Left panel: search + tree + progress */}
+        <div className="flex flex-col w-80 border-r shrink-0">
+          <KeySearchBar />
+          <div className="flex-1 min-h-0">
+            <KeyTree />
+          </div>
+          <ScanProgress />
+        </div>
+
+        {/* Right panel: key detail */}
+        <div className="flex-1 min-w-0">
+          <KeyDetailPanel />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -6,6 +6,9 @@ import {
   type ConnectionProfile,
   type ConnectionState,
   type HealthResponse,
+  type KeyInfo,
+  type KeyNode,
+  type ScanResult,
   type ServerInfoSummary,
 } from './types';
 
@@ -72,4 +75,72 @@ export async function connectionDisconnect(id: string): Promise<void> {
 /** Get the connection state for a profile. */
 export async function connectionState(id: string): Promise<ConnectionState> {
   return tauriInvoke<ConnectionState>('connection_state', { id });
+}
+
+// ─── Browser ──────────────────────────────────────────────────
+
+/** Scan keys matching a pattern. Call repeatedly until `finished` is true. */
+export async function browserScanKeys(
+  connectionId: string,
+  cursor: number,
+  pattern: string,
+  count: number,
+): Promise<ScanResult> {
+  return tauriInvoke<ScanResult>('browser_scan_keys', {
+    connectionId,
+    cursor,
+    pattern,
+    count,
+  });
+}
+
+/** Build a key tree from a flat list of keys. */
+export async function browserBuildTree(
+  keys: string[],
+  delimiter: string,
+): Promise<KeyNode[]> {
+  return tauriInvoke<KeyNode[]>('browser_build_tree', { keys, delimiter });
+}
+
+/** Get children of a namespace prefix from a key list. */
+export async function browserGetChildren(
+  keys: string[],
+  prefix: string,
+  delimiter: string,
+  depth: number,
+): Promise<KeyNode[]> {
+  return tauriInvoke<KeyNode[]>('browser_get_children', { keys, prefix, delimiter, depth });
+}
+
+/** Get metadata (type + TTL) for a batch of keys. */
+export async function browserGetKeysInfo(
+  connectionId: string,
+  keys: string[],
+): Promise<KeyInfo[]> {
+  return tauriInvoke<KeyInfo[]>('browser_get_keys_info', { connectionId, keys });
+}
+
+/** Get detailed info for a single key. */
+export async function browserGetKeyInfo(
+  connectionId: string,
+  key: string,
+): Promise<KeyInfo> {
+  return tauriInvoke<KeyInfo>('browser_get_key_info', { connectionId, key });
+}
+
+/** Delete one or more keys using UNLINK. Returns count of deleted keys. */
+export async function browserDeleteKeys(
+  connectionId: string,
+  keys: string[],
+): Promise<number> {
+  return tauriInvoke<number>('browser_delete_keys', { connectionId, keys });
+}
+
+/** Rename a key. Fails if the new name already exists. */
+export async function browserRenameKey(
+  connectionId: string,
+  oldName: string,
+  newName: string,
+): Promise<void> {
+  return tauriInvoke<void>('browser_rename_key', { connectionId, oldName, newName });
 }
