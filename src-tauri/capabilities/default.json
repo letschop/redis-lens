@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicegoodthings/tauri-capability-schema/main/schema.json",
+  "identifier": "default",
+  "description": "Default capabilities for RedisLens",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open"
+  ]
+}
