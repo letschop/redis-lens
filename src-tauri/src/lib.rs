@@ -50,6 +50,29 @@ pub fn run() {
             commands::browser::browser_get_key_info,
             commands::browser::browser_delete_keys,
             commands::browser::browser_rename_key,
+            // Editor commands — string
+            commands::editor::editor_get_string_value,
+            commands::editor::editor_set_string_value,
+            commands::editor::editor_get_string_range,
+            // Editor commands — hash
+            commands::editor::editor_get_hash_all,
+            commands::editor::editor_scan_hash_fields,
+            commands::editor::editor_set_hash_field,
+            commands::editor::editor_delete_hash_fields,
+            // Editor commands — list
+            commands::editor::editor_get_list_range,
+            commands::editor::editor_push_list_element,
+            commands::editor::editor_set_list_element,
+            commands::editor::editor_remove_list_element,
+            // Editor commands — set
+            commands::editor::editor_get_set_members,
+            commands::editor::editor_scan_set_members,
+            commands::editor::editor_add_set_members,
+            commands::editor::editor_remove_set_members,
+            // Editor commands — TTL
+            commands::editor::editor_get_ttl,
+            commands::editor::editor_set_ttl,
+            commands::editor::editor_persist_key,
         ])
         .run(tauri::generate_context!())
         .expect("error while running RedisLens");

@@ -180,6 +180,49 @@ export interface FlatTreeNode {
   indent: number;
 }
 
+// ─── Editor Types ───────────────────────────────────────────
+
+/** String value returned by the editor (may be text or base64-encoded binary). */
+export interface StringValue {
+  text?: string;
+  base64?: string;
+  sizeBytes: number;
+  isBinary: boolean;
+}
+
+/** A single field-value pair in a Redis hash. */
+export interface HashField {
+  field: string;
+  value: string;
+}
+
+/** Paginated result from HSCAN. */
+export interface HashScanResult {
+  cursor: number;
+  fields: HashField[];
+  finished: boolean;
+}
+
+/** A single element in a Redis list. */
+export interface ListElement {
+  index: number;
+  value: string;
+}
+
+/** Paginated result from SSCAN. */
+export interface SetScanResult {
+  cursor: number;
+  members: string[];
+  finished: boolean;
+}
+
+/** TTL metadata for a key. */
+export interface TtlInfo {
+  seconds: number;
+  isPersistent: boolean;
+  isMissing: boolean;
+}
+
 // ─── Default Factories ─────────────────────────────────────────
 
 export function createDefaultProfile(

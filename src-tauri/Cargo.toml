@@ -33,3 +33,6 @@ deadpool-redis = "0.18"
 # URI parsing
 url = "2"
 percent-encoding = "2"
+
+# Encoding
+base64 = "0.22"

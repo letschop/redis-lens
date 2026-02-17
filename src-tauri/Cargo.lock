@@ -2758,6 +2758,7 @@ dependencies = [
 name = "redis-lens"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "chrono",
  "deadpool-redis",
  "percent-encoding",
