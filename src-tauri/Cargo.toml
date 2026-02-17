@@ -26,10 +26,10 @@ chrono = { version = "0.4", features = ["serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 
-# Redis (will be enabled in Phase 2)
-# redis = { version = "0.27", features = ["tokio-comp", "connection-manager"] }
-# deadpool-redis = "0.18"
+# Redis
+redis = { version = "0.27", features = ["tokio-comp", "connection-manager", "aio"] }
+deadpool-redis = "0.18"
 
-# Security (will be enabled in Phase 2)
-# keyring = { version = "3", features = ["apple-native", "windows-native", "linux-native"] }
-# url = "2"
+# URI parsing
+url = "2"
+percent-encoding = "2"

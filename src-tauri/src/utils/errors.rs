@@ -33,3 +33,28 @@ pub enum AppError {
     #[error("Internal error: {0}")]
     Internal(String),
 }
+
+impl From<redis::RedisError> for AppError {
+    fn from(err: redis::RedisError) -> Self {
+        let msg = err.to_string();
+        if msg.contains("NOAUTH") || msg.contains("ERR AUTH") || msg.contains("WRONGPASS") {
+            AppError::Connection(format!("Authentication failed: {msg}"))
+        } else if msg.contains("Connection refused") {
+            AppError::Connection(format!("Connection refused: {msg}"))
+        } else {
+            AppError::Redis(msg)
+        }
+    }
+}
+
+impl From<deadpool_redis::PoolError> for AppError {
+    fn from(err: deadpool_redis::PoolError) -> Self {
+        AppError::Pool(format!("Connection pool error: {err}"))
+    }
+}
+
+impl From<uuid::Error> for AppError {
+    fn from(err: uuid::Error) -> Self {
+        AppError::InvalidInput(format!("Invalid UUID: {err}"))
+    }
+}

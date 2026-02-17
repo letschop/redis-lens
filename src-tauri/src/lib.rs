@@ -11,6 +11,7 @@ pub mod config;
 pub mod redis;
 pub mod utils;
 
+use redis::connection::manager::ConnectionManager;
 use tracing_subscriber::EnvFilter;
 
 /// Initialize the Tauri application.
@@ -30,9 +31,17 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .manage(ConnectionManager::new())
         .invoke_handler(tauri::generate_handler![
-            commands::connection::connection_test,
             commands::health::health_check,
+            commands::connection::connection_test,
+            commands::connection::connection_parse_uri,
+            commands::connection::connection_save,
+            commands::connection::connection_list,
+            commands::connection::connection_delete,
+            commands::connection::connection_connect,
+            commands::connection::connection_disconnect,
+            commands::connection::connection_state,
         ])
         .run(tauri::generate_context!())
         .expect("error while running RedisLens");
