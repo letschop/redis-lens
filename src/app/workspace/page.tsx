@@ -155,9 +155,7 @@ function WorkspaceContent() {
         </div>
         <div className="min-w-0">
           <h1 className="text-sm font-semibold truncate">{profile.name}</h1>
-          <p className="text-xs text-muted-foreground">
-            {maskHost(profile.host)}
-          </p>
+          <p className="text-xs text-muted-foreground">{maskHost(profile.host)}</p>
         </div>
 
         {/* Navigation tabs */}
@@ -310,9 +308,7 @@ function WorkspaceContent() {
               {monitorSubTab === 'server' && latestInfo && <ServerInfoPanel info={latestInfo} />}
               {monitorSubTab === 'slowlog' && <SlowLogTable connectionId={connectionId} />}
               {monitorSubTab === 'clients' && <ClientListTable connectionId={connectionId} />}
-              {monitorSubTab === 'memory' && (
-                <MemoryAnalysisPanel connectionId={connectionId} />
-              )}
+              {monitorSubTab === 'memory' && <MemoryAnalysisPanel connectionId={connectionId} />}
               {monitorSubTab === 'server' && !latestInfo && (
                 <p className="py-8 text-center text-sm text-muted-foreground">
                   Waiting for data...

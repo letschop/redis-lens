@@ -93,9 +93,7 @@ export function ConnectionCard({
               </Badge>
             )}
           </div>
-          <p className="text-sm text-muted-foreground truncate">
-            {maskHost(profile.host)}
-          </p>
+          <p className="text-sm text-muted-foreground truncate">{maskHost(profile.host)}</p>
           {state?.status === 'connected' && (
             <p className="text-xs text-muted-foreground mt-0.5">
               Redis {state.serverInfo.redisVersion} &middot; {state.serverInfo.usedMemoryHuman}{' '}

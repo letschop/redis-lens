@@ -90,28 +90,48 @@ export function CommandPalette() {
                 {connectedProfiles.map((p) => (
                   <Command.Group key={p.id} heading={p.name}>
                     <Command.Item
-                      onSelect={() => runAction(() => { setActiveConnection(p.id); router.push('/workspace'); })}
+                      onSelect={() =>
+                        runAction(() => {
+                          setActiveConnection(p.id);
+                          router.push('/workspace');
+                        })
+                      }
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <HardDrive className="h-3.5 w-3.5 text-muted-foreground" />
                       {p.name} &mdash; Keys
                     </Command.Item>
                     <Command.Item
-                      onSelect={() => runAction(() => { setActiveConnection(p.id); router.push('/workspace?tab=monitor'); })}
+                      onSelect={() =>
+                        runAction(() => {
+                          setActiveConnection(p.id);
+                          router.push('/workspace?tab=monitor');
+                        })
+                      }
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <Activity className="h-3.5 w-3.5 text-muted-foreground" />
                       {p.name} &mdash; Monitor
                     </Command.Item>
                     <Command.Item
-                      onSelect={() => runAction(() => { setActiveConnection(p.id); router.push('/workspace?tab=cli'); })}
+                      onSelect={() =>
+                        runAction(() => {
+                          setActiveConnection(p.id);
+                          router.push('/workspace?tab=cli');
+                        })
+                      }
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <Terminal className="h-3.5 w-3.5 text-muted-foreground" />
                       {p.name} &mdash; CLI
                     </Command.Item>
                     <Command.Item
-                      onSelect={() => runAction(() => { setActiveConnection(p.id); router.push('/workspace?tab=pubsub'); })}
+                      onSelect={() =>
+                        runAction(() => {
+                          setActiveConnection(p.id);
+                          router.push('/workspace?tab=pubsub');
+                        })
+                      }
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <Radio className="h-3.5 w-3.5 text-muted-foreground" />
