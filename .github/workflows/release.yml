@@ -84,16 +84,16 @@ jobs:
       matrix:
         settings:
           - os: macos-latest
-            target: aarch64-apple-darwin
-            label: macOS-arm64
-          - os: macos-13
-            target: x86_64-apple-darwin
-            label: macOS-x64
+            target: universal-apple-darwin
+            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+            label: macOS-universal
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
+            rust_targets: x86_64-unknown-linux-gnu
             label: Linux-x64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
+            rust_targets: x86_64-pc-windows-msvc
             label: Windows-x64
     runs-on: ${{ matrix.settings.os }}
     steps:
@@ -102,7 +102,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.settings.target }}
+          targets: ${{ matrix.settings.rust_targets }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -211,7 +211,9 @@ jobs:
             src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.dmg
             src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.AppImage
             src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.deb
+            src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.rpm
             src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.msi
+            src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.exe
 
   publish-release:
     name: Publish Release

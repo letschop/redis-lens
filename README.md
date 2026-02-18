@@ -29,7 +29,7 @@ Download the latest release for your platform:
 
 | Platform | Download |
 |----------|----------|
-| macOS (Apple Silicon) | [RedisLens.dmg](https://github.com/letschop/redis-lens/releases/latest) |
+| macOS (Intel + Apple Silicon) | [RedisLens.dmg](https://github.com/letschop/redis-lens/releases/latest) |
 | Windows (x64) | [RedisLens.exe](https://github.com/letschop/redis-lens/releases/latest) / [.msi](https://github.com/letschop/redis-lens/releases/latest) |
 | Linux (x64) | [RedisLens.AppImage](https://github.com/letschop/redis-lens/releases/latest) / [.deb](https://github.com/letschop/redis-lens/releases/latest) / [.rpm](https://github.com/letschop/redis-lens/releases/latest) |
 
