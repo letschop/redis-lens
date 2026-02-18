@@ -17,8 +17,7 @@ export function MetricCard({ label, value, subtitle, trend, status }: MetricCard
         ? 'text-yellow-500'
         : 'text-green-500';
 
-  const trendIcon =
-    trend === 'up' ? '\u2191' : trend === 'down' ? '\u2193' : '';
+  const trendIcon = trend === 'up' ? '\u2191' : trend === 'down' ? '\u2193' : '';
 
   return (
     <div className="rounded-lg border bg-card p-4 shadow-sm">

@@ -7,11 +7,7 @@ import { ArrowLeft, HardDrive, Activity, Terminal, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CliConsole } from '@/components/modules/cli/CliConsole';
 
-export default function CliClient({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function CliClient({ params }: { params: Promise<{ id: string }> }) {
   const { id: connectionId } = use(params);
 
   return (

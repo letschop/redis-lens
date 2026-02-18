@@ -20,7 +20,10 @@ export function HllViewer() {
     const trimmed = newElement.trim();
     if (!trimmed) return;
     // Support comma-separated multiple elements
-    const elements = trimmed.split(',').map((e) => e.trim()).filter(Boolean);
+    const elements = trimmed
+      .split(',')
+      .map((e) => e.trim())
+      .filter(Boolean);
     if (elements.length === 0) return;
     await addHllElements(elements);
     setNewElement('');
@@ -96,17 +99,14 @@ export function HllViewer() {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Memory Usage</span>
-          <span className="font-mono text-xs tabular-nums">
-            {formatBytes(info.sizeBytes)}
-          </span>
+          <span className="font-mono text-xs tabular-nums">{formatBytes(info.sizeBytes)}</span>
         </div>
       </div>
 
       {/* Info */}
       <div className="text-xs text-muted-foreground px-1">
-        HyperLogLog is a probabilistic data structure. The cardinality shown is an
-        approximation with a standard error of 0.81%. Individual elements cannot be
-        retrieved or listed.
+        HyperLogLog is a probabilistic data structure. The cardinality shown is an approximation
+        with a standard error of 0.81%. Individual elements cannot be retrieved or listed.
       </div>
     </div>
   );

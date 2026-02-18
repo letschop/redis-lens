@@ -178,7 +178,9 @@ export function CommandInput({ connectionId }: CommandInputProps) {
               <button
                 key={suggestion.command}
                 className={`flex w-full flex-col gap-0.5 rounded px-2 py-1.5 text-left text-sm ${
-                  idx === selectedSuggestion ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
+                  idx === selectedSuggestion
+                    ? 'bg-accent text-accent-foreground'
+                    : 'hover:bg-accent/50'
                 }`}
                 onMouseDown={(e) => {
                   e.preventDefault();

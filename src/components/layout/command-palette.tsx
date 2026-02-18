@@ -38,17 +38,12 @@ export function CommandPalette() {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const runAction = useCallback(
-    (fn: () => void) => {
-      fn();
-      setOpen(false);
-    },
-    [],
-  );
+  const runAction = useCallback((fn: () => void) => {
+    fn();
+    setOpen(false);
+  }, []);
 
-  const connectedProfiles = profiles.filter(
-    (p) => states[p.id]?.status === 'connected',
-  );
+  const connectedProfiles = profiles.filter((p) => states[p.id]?.status === 'connected');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -94,42 +89,28 @@ export function CommandPalette() {
                 {connectedProfiles.map((p) => (
                   <Command.Group key={p.id} heading={p.name}>
                     <Command.Item
-                      onSelect={() =>
-                        runAction(() => router.push(`/connections/${p.id}`))
-                      }
+                      onSelect={() => runAction(() => router.push(`/connections/${p.id}`))}
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <HardDrive className="h-3.5 w-3.5 text-muted-foreground" />
                       {p.name} &mdash; Keys
                     </Command.Item>
                     <Command.Item
-                      onSelect={() =>
-                        runAction(() =>
-                          router.push(`/connections/${p.id}/monitor`),
-                        )
-                      }
+                      onSelect={() => runAction(() => router.push(`/connections/${p.id}/monitor`))}
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <Activity className="h-3.5 w-3.5 text-muted-foreground" />
                       {p.name} &mdash; Monitor
                     </Command.Item>
                     <Command.Item
-                      onSelect={() =>
-                        runAction(() =>
-                          router.push(`/connections/${p.id}/cli`),
-                        )
-                      }
+                      onSelect={() => runAction(() => router.push(`/connections/${p.id}/cli`))}
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <Terminal className="h-3.5 w-3.5 text-muted-foreground" />
                       {p.name} &mdash; CLI
                     </Command.Item>
                     <Command.Item
-                      onSelect={() =>
-                        runAction(() =>
-                          router.push(`/connections/${p.id}/pubsub`),
-                        )
-                      }
+                      onSelect={() => runAction(() => router.push(`/connections/${p.id}/pubsub`))}
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer aria-selected:bg-accent"
                     >
                       <Radio className="h-3.5 w-3.5 text-muted-foreground" />

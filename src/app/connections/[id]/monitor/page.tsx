@@ -6,10 +6,6 @@ export function generateStaticParams() {
   return [{ id: '_' }];
 }
 
-export default function MonitorPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function MonitorPage({ params }: { params: Promise<{ id: string }> }) {
   return <MonitorClient params={params} />;
 }

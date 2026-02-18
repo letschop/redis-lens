@@ -43,10 +43,7 @@ export function ZSetEditor() {
   }, []);
 
   const sorted = [...members].sort((a, b) => {
-    const cmp =
-      sortField === 'score'
-        ? a.score - b.score
-        : a.member.localeCompare(b.member);
+    const cmp = sortField === 'score' ? a.score - b.score : a.member.localeCompare(b.member);
     return sortDir === 'asc' ? cmp : -cmp;
   });
 
@@ -172,9 +169,7 @@ export function ZSetEditor() {
           <TableBody>
             {filtered.map((m) => (
               <TableRow key={m.member}>
-                <TableCell className="py-1 font-mono text-xs break-all">
-                  {m.member}
-                </TableCell>
+                <TableCell className="py-1 font-mono text-xs break-all">{m.member}</TableCell>
                 <TableCell className="py-1 font-mono text-xs tabular-nums">
                   <button
                     type="button"

@@ -49,11 +49,13 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <Label className="text-xs text-muted-foreground">Theme</Label>
               <div className="flex gap-2">
-                {([
-                  { value: 'light', icon: Sun, label: 'Light' },
-                  { value: 'dark', icon: Moon, label: 'Dark' },
-                  { value: 'system', icon: Monitor, label: 'System' },
-                ] as const).map(({ value, icon: Icon, label }) => (
+                {(
+                  [
+                    { value: 'light', icon: Sun, label: 'Light' },
+                    { value: 'dark', icon: Moon, label: 'Dark' },
+                    { value: 'system', icon: Monitor, label: 'System' },
+                  ] as const
+                ).map(({ value, icon: Icon, label }) => (
                   <Button
                     key={value}
                     variant={theme === value ? 'default' : 'outline'}
@@ -140,7 +142,9 @@ export default function SettingsPage() {
                 <Button
                   variant={confirmDangerousCommands ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => updateSetting('confirmDangerousCommands', !confirmDangerousCommands)}
+                  onClick={() =>
+                    updateSetting('confirmDangerousCommands', !confirmDangerousCommands)
+                  }
                 >
                   {confirmDangerousCommands ? 'On' : 'Off'}
                 </Button>

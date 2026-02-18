@@ -6,10 +6,6 @@ export function generateStaticParams() {
   return [{ id: '_' }];
 }
 
-export default function ConnectionDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function ConnectionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return <ConnectionDetailClient params={params} />;
 }

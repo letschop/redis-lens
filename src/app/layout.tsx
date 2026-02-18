@@ -24,9 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           <PromoBanner />
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <ErrorBoundary>{children}</ErrorBoundary>
           <CommandPalette />
           <Toaster position="bottom-right" richColors closeButton />
         </ThemeProvider>

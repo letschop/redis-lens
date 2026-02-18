@@ -140,9 +140,7 @@ export function HashEditor() {
             )}
             {filteredFields.map((f) => (
               <TableRow key={f.field}>
-                <TableCell className="py-1 font-mono text-xs break-all">
-                  {f.field}
-                </TableCell>
+                <TableCell className="py-1 font-mono text-xs break-all">{f.field}</TableCell>
                 <TableCell className="py-1 font-mono text-xs">
                   {editingField === f.field ? (
                     <Input

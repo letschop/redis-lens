@@ -117,10 +117,7 @@ export async function browserScanKeys(
 }
 
 /** Build a key tree from a flat list of keys. */
-export async function browserBuildTree(
-  keys: string[],
-  delimiter: string,
-): Promise<KeyNode[]> {
+export async function browserBuildTree(keys: string[], delimiter: string): Promise<KeyNode[]> {
   return tauriInvoke<KeyNode[]>('browser_build_tree', { keys, delimiter });
 }
 
@@ -135,26 +132,17 @@ export async function browserGetChildren(
 }
 
 /** Get metadata (type + TTL) for a batch of keys. */
-export async function browserGetKeysInfo(
-  connectionId: string,
-  keys: string[],
-): Promise<KeyInfo[]> {
+export async function browserGetKeysInfo(connectionId: string, keys: string[]): Promise<KeyInfo[]> {
   return tauriInvoke<KeyInfo[]>('browser_get_keys_info', { connectionId, keys });
 }
 
 /** Get detailed info for a single key. */
-export async function browserGetKeyInfo(
-  connectionId: string,
-  key: string,
-): Promise<KeyInfo> {
+export async function browserGetKeyInfo(connectionId: string, key: string): Promise<KeyInfo> {
   return tauriInvoke<KeyInfo>('browser_get_key_info', { connectionId, key });
 }
 
 /** Delete one or more keys using UNLINK. Returns count of deleted keys. */
-export async function browserDeleteKeys(
-  connectionId: string,
-  keys: string[],
-): Promise<number> {
+export async function browserDeleteKeys(connectionId: string, keys: string[]): Promise<number> {
   return tauriInvoke<number>('browser_delete_keys', { connectionId, keys });
 }
 
@@ -200,10 +188,7 @@ export async function editorGetStringRange(
 // ─── Editor — Hash ──────────────────────────────────────────────
 
 /** Get all fields of a hash (suitable for small hashes). */
-export async function editorGetHashAll(
-  connectionId: string,
-  key: string,
-): Promise<HashField[]> {
+export async function editorGetHashAll(connectionId: string, key: string): Promise<HashField[]> {
   return tauriInvoke<HashField[]>('editor_get_hash_all', { connectionId, key });
 }
 
@@ -288,10 +273,7 @@ export async function editorRemoveListElement(
 // ─── Editor — Set ───────────────────────────────────────────────
 
 /** Get all members of a set (for small sets). */
-export async function editorGetSetMembers(
-  connectionId: string,
-  key: string,
-): Promise<string[]> {
+export async function editorGetSetMembers(connectionId: string, key: string): Promise<string[]> {
   return tauriInvoke<string[]>('editor_get_set_members', { connectionId, key });
 }
 
@@ -389,10 +371,7 @@ export async function editorIncrZsetScore(
 }
 
 /** Get sorted set cardinality. */
-export async function editorZsetCard(
-  connectionId: string,
-  key: string,
-): Promise<number> {
+export async function editorZsetCard(connectionId: string, key: string): Promise<number> {
   return tauriInvoke<number>('editor_zset_card', { connectionId, key });
 }
 
@@ -452,10 +431,7 @@ export async function editorDeleteStreamEntries(
 }
 
 /** Get stream info including consumer groups. */
-export async function editorGetStreamInfo(
-  connectionId: string,
-  key: string,
-): Promise<StreamInfo> {
+export async function editorGetStreamInfo(connectionId: string, key: string): Promise<StreamInfo> {
   return tauriInvoke<StreamInfo>('editor_get_stream_info', { connectionId, key });
 }
 
@@ -490,10 +466,7 @@ export async function editorSetJsonValue(
 // ─── Editor — HyperLogLog ──────────────────────────────────────
 
 /** Get HyperLogLog info. */
-export async function editorGetHllInfo(
-  connectionId: string,
-  key: string,
-): Promise<HllInfo> {
+export async function editorGetHllInfo(connectionId: string, key: string): Promise<HllInfo> {
   return tauriInvoke<HllInfo>('editor_get_hll_info', { connectionId, key });
 }
 
@@ -536,10 +509,7 @@ export async function editorSetBitmapBit(
 // ─── Editor — Geospatial ───────────────────────────────────────
 
 /** Get all geospatial members with coordinates. */
-export async function editorGetGeoMembers(
-  connectionId: string,
-  key: string,
-): Promise<GeoMember[]> {
+export async function editorGetGeoMembers(connectionId: string, key: string): Promise<GeoMember[]> {
   return tauriInvoke<GeoMember[]>('editor_get_geo_members', { connectionId, key });
 }
 
@@ -589,10 +559,7 @@ export async function editorRemoveGeoMembers(
 // ─── Editor — TTL ───────────────────────────────────────────────
 
 /** Get TTL information for a key. */
-export async function editorGetTtl(
-  connectionId: string,
-  key: string,
-): Promise<TtlInfo> {
+export async function editorGetTtl(connectionId: string, key: string): Promise<TtlInfo> {
   return tauriInvoke<TtlInfo>('editor_get_ttl', { connectionId, key });
 }
 
@@ -606,10 +573,7 @@ export async function editorSetTtl(
 }
 
 /** Remove TTL from a key (make it persistent). Returns true if TTL was removed. */
-export async function editorPersistKey(
-  connectionId: string,
-  key: string,
-): Promise<boolean> {
+export async function editorPersistKey(connectionId: string, key: string): Promise<boolean> {
   return tauriInvoke<boolean>('editor_persist_key', { connectionId, key });
 }
 
@@ -647,10 +611,7 @@ export async function monitorClientList(connectionId: string): Promise<MonitorCl
 }
 
 /** Kill a connected client by ID. */
-export async function monitorKillClient(
-  connectionId: string,
-  clientId: number,
-): Promise<void> {
+export async function monitorKillClient(connectionId: string, clientId: number): Promise<void> {
   return tauriInvoke<void>('monitor_kill_client', { connectionId, clientId });
 }
 
@@ -671,9 +632,7 @@ export async function cliExecute(
 }
 
 /** Get command suggestions matching a prefix (for autocomplete). */
-export async function cliGetCommandSuggestions(
-  prefix: string,
-): Promise<CommandSuggestion[]> {
+export async function cliGetCommandSuggestions(prefix: string): Promise<CommandSuggestion[]> {
   return tauriInvoke<CommandSuggestion[]>('cli_get_command_suggestions', { prefix });
 }
 
@@ -688,18 +647,12 @@ export async function cliGetCommandHistory(
 // ─── Pub/Sub ────────────────────────────────────────────────
 
 /** Subscribe to one or more literal channels. Returns a subscription ID. */
-export async function pubsubSubscribe(
-  connectionId: string,
-  channels: string[],
-): Promise<string> {
+export async function pubsubSubscribe(connectionId: string, channels: string[]): Promise<string> {
   return tauriInvoke<string>('pubsub_subscribe', { connectionId, channels });
 }
 
 /** Subscribe to one or more channel patterns. Returns a subscription ID. */
-export async function pubsubPsubscribe(
-  connectionId: string,
-  patterns: string[],
-): Promise<string> {
+export async function pubsubPsubscribe(connectionId: string, patterns: string[]): Promise<string> {
   return tauriInvoke<string>('pubsub_psubscribe', { connectionId, patterns });
 }
 

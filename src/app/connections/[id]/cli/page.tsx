@@ -6,10 +6,6 @@ export function generateStaticParams() {
   return [{ id: '_' }];
 }
 
-export default function CliPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function CliPage({ params }: { params: Promise<{ id: string }> }) {
   return <CliClient params={params} />;
 }

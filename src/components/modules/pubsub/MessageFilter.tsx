@@ -11,7 +11,11 @@ interface MessageFilterProps {
   totalCount: number;
 }
 
-export function MessageFilter({ connectionId: _connectionId, filteredCount, totalCount }: MessageFilterProps) {
+export function MessageFilter({
+  connectionId: _connectionId,
+  filteredCount,
+  totalCount,
+}: MessageFilterProps) {
   const channelFilter = usePubSubStore((s) => s.channelFilter);
   const payloadFilter = usePubSubStore((s) => s.payloadFilter);
   const isPaused = usePubSubStore((s) => s.isPaused);
@@ -51,19 +55,16 @@ export function MessageFilter({ connectionId: _connectionId, filteredCount, tota
         >
           {isPaused ? 'Resume' : 'Pause'}
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={clearMessages}
-          className="flex-1"
-        >
+        <Button size="sm" variant="outline" onClick={clearMessages} className="flex-1">
           Clear
         </Button>
       </div>
 
       <div className="text-xs text-muted-foreground">
         {filteredCount === totalCount ? (
-          <span>{totalCount} message{totalCount !== 1 ? 's' : ''}</span>
+          <span>
+            {totalCount} message{totalCount !== 1 ? 's' : ''}
+          </span>
         ) : (
           <span>
             {filteredCount} of {totalCount} message{totalCount !== 1 ? 's' : ''}

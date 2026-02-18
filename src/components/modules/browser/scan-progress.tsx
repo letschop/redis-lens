@@ -21,7 +21,10 @@ export function ScanProgress() {
       <span className="tabular-nums">
         {allKeys.length.toLocaleString()} keys loaded
         {totalEstimate > 0 && !scanComplete && (
-          <> of ~{totalEstimate.toLocaleString()} ({percentage}%)</>
+          <>
+            {' '}
+            of ~{totalEstimate.toLocaleString()} ({percentage}%)
+          </>
         )}
         {scanComplete && <> (complete)</>}
       </span>

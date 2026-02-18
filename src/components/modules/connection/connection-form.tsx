@@ -32,7 +32,9 @@ type TestStatus =
   | { state: 'error'; message: string };
 
 export function ConnectionForm({ initialProfile, onSaved, onCancel }: ConnectionFormProps) {
-  const [profile, setProfile] = useState<ConnectionProfile>(initialProfile ?? createDefaultProfile());
+  const [profile, setProfile] = useState<ConnectionProfile>(
+    initialProfile ?? createDefaultProfile(),
+  );
   const [testStatus, setTestStatus] = useState<TestStatus>({ state: 'idle' });
   const [uriInput, setUriInput] = useState('');
   const [saving, setSaving] = useState(false);

@@ -25,8 +25,14 @@ export function EditorPanel() {
   useEffect(() => {
     if (selectedKey && selectedKeyInfo && connectionId) {
       const supported = [
-        'string', 'hash', 'list', 'set', 'zset', 'stream',
-        'ReJSON-RL', 'rejson-rl',
+        'string',
+        'hash',
+        'list',
+        'set',
+        'zset',
+        'stream',
+        'ReJSON-RL',
+        'rejson-rl',
       ];
       if (supported.includes(selectedKeyInfo.keyType)) {
         void loadKey(
@@ -49,10 +55,7 @@ export function EditorPanel() {
   }
 
   // Unsupported type
-  const supported = [
-    'string', 'hash', 'list', 'set', 'zset', 'stream',
-    'ReJSON-RL', 'rejson-rl',
-  ];
+  const supported = ['string', 'hash', 'list', 'set', 'zset', 'stream', 'ReJSON-RL', 'rejson-rl'];
   if (!supported.includes(selectedKeyInfo.keyType)) {
     return (
       <div className="px-1 py-2 text-xs text-muted-foreground">

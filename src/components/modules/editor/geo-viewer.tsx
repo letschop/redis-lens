@@ -137,9 +137,7 @@ export function GeoViewer() {
           <TableBody>
             {filtered.map((m) => (
               <TableRow key={m.member}>
-                <TableCell className="py-1 font-mono text-xs break-all">
-                  {m.member}
-                </TableCell>
+                <TableCell className="py-1 font-mono text-xs break-all">{m.member}</TableCell>
                 <TableCell className="py-1 font-mono text-xs tabular-nums">
                   {m.longitude.toFixed(6)}
                 </TableCell>

@@ -95,9 +95,7 @@ export function SubscriptionForm({ connectionId }: SubscriptionFormProps) {
 
       {subscriptions.length > 0 && (
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">
-            Active Subscriptions
-          </label>
+          <label className="text-xs font-medium text-muted-foreground">Active Subscriptions</label>
           <div className="flex flex-wrap gap-1.5">
             {subscriptions.map((sub) => {
               const labels =

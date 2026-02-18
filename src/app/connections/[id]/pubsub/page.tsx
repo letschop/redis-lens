@@ -6,10 +6,6 @@ export function generateStaticParams() {
   return [{ id: '_' }];
 }
 
-export default function PubSubPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function PubSubPage({ params }: { params: Promise<{ id: string }> }) {
   return <PubSubClient params={params} />;
 }

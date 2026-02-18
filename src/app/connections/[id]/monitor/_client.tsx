@@ -18,21 +18,10 @@ import { MemoryAnalysisPanel } from '@/components/modules/monitor/MemoryAnalysis
 
 type Tab = 'server' | 'slowlog' | 'clients' | 'memory';
 
-export default function MonitorClient({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function MonitorClient({ params }: { params: Promise<{ id: string }> }) {
   const { id: connectionId } = use(params);
-  const {
-    timeSeries,
-    latestInfo,
-    latestDerived,
-    polling,
-    startPolling,
-    stopPolling,
-    reset,
-  } = useMonitorStore();
+  const { timeSeries, latestInfo, latestDerived, polling, startPolling, stopPolling, reset } =
+    useMonitorStore();
 
   const [activeTab, setActiveTab] = useState<Tab>('server');
 
@@ -109,93 +98,90 @@ export default function MonitorClient({
       </div>
 
       <div className="flex-1 overflow-auto p-4 space-y-4">
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <MetricCard
-          label="Memory"
-          value={latestInfo?.memory.usedMemoryHuman ?? '-'}
-          subtitle={latestInfo?.memory.maxmemoryHuman ? `/ ${latestInfo.memory.maxmemoryHuman}` : undefined}
-          status={
-            latestDerived?.memoryUsagePercent
-              ? latestDerived.memoryUsagePercent > 90
-                ? 'critical'
-                : latestDerived.memoryUsagePercent > 70
-                  ? 'warning'
-                  : 'good'
-              : undefined
-          }
-        />
-        <MetricCard
-          label="Ops/sec"
-          value={latestInfo?.stats.instantaneousOpsPerSec.toLocaleString() ?? '-'}
-        />
-        <MetricCard
-          label="Clients"
-          value={String(latestInfo?.clients.connectedClients ?? '-')}
-        />
-        <MetricCard
-          label="Hit Rate"
-          value={latestDerived ? `${latestDerived.hitRatePercent.toFixed(1)}%` : '-'}
-          status={
-            latestDerived
-              ? latestDerived.hitRatePercent > 90
-                ? 'good'
-                : latestDerived.hitRatePercent > 50
-                  ? 'warning'
-                  : 'critical'
-              : undefined
-          }
-        />
-        <MetricCard
-          label="Uptime"
-          value={latestInfo ? formatUptime(latestInfo.server.uptimeInSeconds) : '-'}
-        />
-        <MetricCard
-          label="Keys"
-          value={totalKeys.toLocaleString()}
-        />
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <OpsChart data={timeSeries} />
-        <MemoryChart data={timeSeries} />
-      </div>
-
-      {/* Tabbed Content */}
-      <div className="flex-1 rounded-lg border bg-card">
-        <div className="flex border-b">
-          {(['server', 'slowlog', 'clients', 'memory'] as Tab[]).map((tab) => (
-            <button
-              key={tab}
-              className={`px-4 py-2 text-sm font-medium ${
-                activeTab === tab
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab === 'server'
-                ? 'Server Info'
-                : tab === 'slowlog'
-                  ? 'Slow Log'
-                  : tab === 'clients'
-                    ? 'Clients'
-                    : 'Memory'}
-            </button>
-          ))}
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <MetricCard
+            label="Memory"
+            value={latestInfo?.memory.usedMemoryHuman ?? '-'}
+            subtitle={
+              latestInfo?.memory.maxmemoryHuman
+                ? `/ ${latestInfo.memory.maxmemoryHuman}`
+                : undefined
+            }
+            status={
+              latestDerived?.memoryUsagePercent
+                ? latestDerived.memoryUsagePercent > 90
+                  ? 'critical'
+                  : latestDerived.memoryUsagePercent > 70
+                    ? 'warning'
+                    : 'good'
+                : undefined
+            }
+          />
+          <MetricCard
+            label="Ops/sec"
+            value={latestInfo?.stats.instantaneousOpsPerSec.toLocaleString() ?? '-'}
+          />
+          <MetricCard label="Clients" value={String(latestInfo?.clients.connectedClients ?? '-')} />
+          <MetricCard
+            label="Hit Rate"
+            value={latestDerived ? `${latestDerived.hitRatePercent.toFixed(1)}%` : '-'}
+            status={
+              latestDerived
+                ? latestDerived.hitRatePercent > 90
+                  ? 'good'
+                  : latestDerived.hitRatePercent > 50
+                    ? 'warning'
+                    : 'critical'
+                : undefined
+            }
+          />
+          <MetricCard
+            label="Uptime"
+            value={latestInfo ? formatUptime(latestInfo.server.uptimeInSeconds) : '-'}
+          />
+          <MetricCard label="Keys" value={totalKeys.toLocaleString()} />
         </div>
-        <div className="p-4">
-          {activeTab === 'server' && latestInfo && <ServerInfoPanel info={latestInfo} />}
-          {activeTab === 'slowlog' && <SlowLogTable connectionId={connectionId} />}
-          {activeTab === 'clients' && <ClientListTable connectionId={connectionId} />}
-          {activeTab === 'memory' && <MemoryAnalysisPanel connectionId={connectionId} />}
-          {activeTab === 'server' && !latestInfo && (
-            <p className="py-8 text-center text-sm text-muted-foreground">Waiting for data...</p>
-          )}
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <OpsChart data={timeSeries} />
+          <MemoryChart data={timeSeries} />
         </div>
-      </div>
+
+        {/* Tabbed Content */}
+        <div className="flex-1 rounded-lg border bg-card">
+          <div className="flex border-b">
+            {(['server', 'slowlog', 'clients', 'memory'] as Tab[]).map((tab) => (
+              <button
+                key={tab}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === tab
+                    ? 'border-b-2 border-primary text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab === 'server'
+                  ? 'Server Info'
+                  : tab === 'slowlog'
+                    ? 'Slow Log'
+                    : tab === 'clients'
+                      ? 'Clients'
+                      : 'Memory'}
+              </button>
+            ))}
+          </div>
+          <div className="p-4">
+            {activeTab === 'server' && latestInfo && <ServerInfoPanel info={latestInfo} />}
+            {activeTab === 'slowlog' && <SlowLogTable connectionId={connectionId} />}
+            {activeTab === 'clients' && <ClientListTable connectionId={connectionId} />}
+            {activeTab === 'memory' && <MemoryAnalysisPanel connectionId={connectionId} />}
+            {activeTab === 'server' && !latestInfo && (
+              <p className="py-8 text-center text-sm text-muted-foreground">Waiting for data...</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

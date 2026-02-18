@@ -136,10 +136,7 @@ export type ConnectionState =
 export type RedisKeyType = 'string' | 'list' | 'set' | 'zset' | 'hash' | 'stream' | string;
 
 /** TTL state for a Redis key. */
-export type Ttl =
-  | { type: 'persistent' }
-  | { type: 'seconds'; value: number }
-  | { type: 'missing' };
+export type Ttl = { type: 'persistent' } | { type: 'seconds'; value: number } | { type: 'missing' };
 
 /** Metadata for a single Redis key. */
 export interface KeyInfo {

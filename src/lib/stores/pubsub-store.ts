@@ -150,9 +150,8 @@ export const usePubSubStore = create<PubSubStore>()((set, get) => ({
 
       const msgs = [...state.messages, event.payload];
       // Trim ring buffer
-      const trimmed = msgs.length > state.maxMessages
-        ? msgs.slice(msgs.length - state.maxMessages)
-        : msgs;
+      const trimmed =
+        msgs.length > state.maxMessages ? msgs.slice(msgs.length - state.maxMessages) : msgs;
       set({ messages: trimmed });
     });
 

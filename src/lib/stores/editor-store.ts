@@ -59,7 +59,12 @@ interface EditorStore {
   // ─── Actions ─────────────────────────────────────────
 
   /** Load a key's value and TTL. Determines type from KeyInfo. */
-  loadKey: (connectionId: string, key: string, keyType: RedisKeyType, length?: number) => Promise<void>;
+  loadKey: (
+    connectionId: string,
+    key: string,
+    keyType: RedisKeyType,
+    length?: number,
+  ) => Promise<void>;
 
   /** Reset editor state. */
   reset: () => void;
@@ -178,7 +183,12 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
           } catch {
             // XINFO may fail on older Redis versions
           }
-          value = { type: 'stream', entries: result.entries, totalLength: result.totalLength, info };
+          value = {
+            type: 'stream',
+            entries: result.entries,
+            totalLength: result.totalLength,
+            info,
+          };
           break;
         }
         default: {

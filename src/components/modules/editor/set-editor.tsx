@@ -107,9 +107,7 @@ export function SetEditor() {
           <TableBody>
             {filteredMembers.map((member) => (
               <TableRow key={member}>
-                <TableCell className="py-1 font-mono text-xs break-all">
-                  {member}
-                </TableCell>
+                <TableCell className="py-1 font-mono text-xs break-all">{member}</TableCell>
                 <TableCell className="py-1">
                   <button
                     type="button"

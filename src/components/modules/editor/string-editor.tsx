@@ -65,18 +65,14 @@ export function StringEditor() {
     setDirty(false);
   }, [rawText, setDirty]);
 
-  const displayValue =
-    displayMode === 'json' && !dirty ? formatJson(editText) : editText;
+  const displayValue = displayMode === 'json' && !dirty ? formatJson(editText) : editText;
 
   if (!stringData) return null;
 
   return (
     <div className="flex flex-col gap-3 h-full">
       <div className="flex items-center gap-2 shrink-0">
-        <Tabs
-          value={displayMode}
-          onValueChange={(v) => setDisplayMode(v as DisplayMode)}
-        >
+        <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as DisplayMode)}>
           <TabsList className="h-7">
             <TabsTrigger value="text" className="text-xs px-2 h-6">
               Text

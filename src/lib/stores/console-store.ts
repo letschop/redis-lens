@@ -17,7 +17,11 @@ interface ConsoleState {
 }
 
 interface ConsoleActions {
-  execute: (connectionId: string, command: string, force?: boolean) => Promise<ExecuteResponse | null>;
+  execute: (
+    connectionId: string,
+    command: string,
+    force?: boolean,
+  ) => Promise<ExecuteResponse | null>;
   loadSuggestions: (prefix: string) => Promise<void>;
   clearSuggestions: () => void;
   clearHistory: (connectionId: string) => void;
@@ -43,9 +47,8 @@ export const useConsoleStore = create<ConsoleStore>()(
           set((state) => {
             const history = [...(state.histories[connectionId] ?? []), response];
             // Trim to max history
-            const trimmed = history.length > MAX_HISTORY
-              ? history.slice(history.length - MAX_HISTORY)
-              : history;
+            const trimmed =
+              history.length > MAX_HISTORY ? history.slice(history.length - MAX_HISTORY) : history;
             return {
               histories: { ...state.histories, [connectionId]: trimmed },
               isExecuting: false,

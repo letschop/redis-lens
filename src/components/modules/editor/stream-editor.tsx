@@ -162,9 +162,7 @@ export function StreamEditor() {
                 <span className="font-mono text-xs text-blue-600 dark:text-blue-400">
                   {entry.id}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {entry.fields.length} fields
-                </span>
+                <span className="text-xs text-muted-foreground">{entry.fields.length} fields</span>
                 <div className="flex-1" />
                 <button
                   type="button"
@@ -194,9 +192,7 @@ export function StreamEditor() {
           );
         })}
         {entries.length === 0 && (
-          <div className="text-center text-xs text-muted-foreground py-4">
-            Stream is empty
-          </div>
+          <div className="text-center text-xs text-muted-foreground py-4">Stream is empty</div>
         )}
       </div>
     </div>

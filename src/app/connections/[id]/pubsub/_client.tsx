@@ -7,11 +7,7 @@ import { ArrowLeft, HardDrive, Activity, Terminal, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PubSubViewer } from '@/components/modules/pubsub/PubSubViewer';
 
-export default function PubSubClient({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function PubSubClient({ params }: { params: Promise<{ id: string }> }) {
   const { id: connectionId } = use(params);
 
   return (

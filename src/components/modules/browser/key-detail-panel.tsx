@@ -186,20 +186,13 @@ export function KeyDetailPanel() {
                 Cancel
               </Button>
             </div>
-            {renameError && (
-              <p className="text-xs text-destructive">{renameError}</p>
-            )}
+            {renameError && <p className="text-xs text-destructive">{renameError}</p>}
           </div>
         )}
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs"
-            onClick={handleStartRename}
-          >
+          <Button variant="outline" size="sm" className="text-xs" onClick={handleStartRename}>
             <PenLine className="mr-1.5 h-3 w-3" />
             Rename
           </Button>

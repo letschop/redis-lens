@@ -26,9 +26,7 @@ export function ClientListTable({ connectionId }: ClientListTableProps) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <h4 className="text-sm font-medium">
-          Connected Clients ({clientList.length})
-        </h4>
+        <h4 className="text-sm font-medium">Connected Clients ({clientList.length})</h4>
         <Button size="sm" variant="outline" onClick={() => fetchClientList(connectionId)}>
           {loadingClientList ? 'Loading...' : 'Refresh'}
         </Button>

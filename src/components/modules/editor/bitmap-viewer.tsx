@@ -55,10 +55,7 @@ export function BitmapViewer() {
           <div className="flex items-center gap-0 mb-1 sticky top-0 bg-background">
             <span className="w-16 text-muted-foreground text-right pr-2 shrink-0">Offset</span>
             {Array.from({ length: 8 }, (_, i) => (
-              <span
-                key={i}
-                className="w-6 text-center text-muted-foreground shrink-0"
-              >
+              <span key={i} className="w-6 text-center text-muted-foreground shrink-0">
                 {i}
               </span>
             ))}
@@ -92,9 +89,7 @@ export function BitmapViewer() {
           })}
 
           {byteRows.length === 0 && (
-            <div className="text-center text-muted-foreground py-4">
-              Bitmap is empty
-            </div>
+            <div className="text-center text-muted-foreground py-4">Bitmap is empty</div>
           )}
         </div>
       </div>

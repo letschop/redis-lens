@@ -17,7 +17,10 @@ function isDangerousWarning(result: CommandResult): boolean {
 
 function getDangerousMessage(result: CommandResult): string {
   if (result.type === 'error' && result.data.startsWith(DANGEROUS_PREFIX)) {
-    return result.data.slice(DANGEROUS_PREFIX.length).replace(/\s*—\s*Re-send.*$/, '').trim();
+    return result.data
+      .slice(DANGEROUS_PREFIX.length)
+      .replace(/\s*—\s*Re-send.*$/, '')
+      .trim();
   }
   return '';
 }

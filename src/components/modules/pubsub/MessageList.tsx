@@ -47,17 +47,15 @@ export function MessageList({ messages }: MessageListProps) {
   if (messages.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-muted-foreground">No messages yet. Subscribe to a channel to start receiving messages.</p>
+        <p className="text-sm text-muted-foreground">
+          No messages yet. Subscribe to a channel to start receiving messages.
+        </p>
       </div>
     );
   }
 
   return (
-    <div
-      ref={scrollRef}
-      onScroll={handleScroll}
-      className="h-full overflow-auto"
-    >
+    <div ref={scrollRef} onScroll={handleScroll} className="h-full overflow-auto">
       <div className="space-y-0.5 p-2">
         {reversed.map((msg, idx) => (
           <div
@@ -75,9 +73,7 @@ export function MessageList({ messages }: MessageListProps) {
                 {msg.pattern}
               </Badge>
             )}
-            <span className="min-w-0 break-all font-mono text-xs">
-              {msg.payload}
-            </span>
+            <span className="min-w-0 break-all font-mono text-xs">{msg.payload}</span>
           </div>
         ))}
       </div>
