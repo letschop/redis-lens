@@ -24,6 +24,14 @@ import {
   type TtlInfo,
   type ZSetMember,
   type ZSetScanResult,
+  type StatsSnapshot,
+  type SlowLogEntry,
+  type MonitorClientInfo,
+  type MemoryStats,
+  type ExecuteResponse,
+  type CommandSuggestion,
+  type CliHistoryEntry,
+  type ChannelInfo,
 } from './types';
 
 /**
@@ -603,4 +611,116 @@ export async function editorPersistKey(
   key: string,
 ): Promise<boolean> {
   return tauriInvoke<boolean>('editor_persist_key', { connectionId, key });
+}
+
+// ─── Monitor ──────────────────────────────────────────────────
+
+/** Fetch a one-shot server info snapshot. */
+export async function monitorServerInfo(connectionId: string): Promise<StatsSnapshot> {
+  return tauriInvoke<StatsSnapshot>('monitor_server_info', { connectionId });
+}
+
+/** Start background polling (emits monitor:stats events). */
+export async function monitorStartPolling(
+  connectionId: string,
+  intervalMs: number = 2000,
+): Promise<void> {
+  return tauriInvoke<void>('monitor_start_polling', { connectionId, intervalMs });
+}
+
+/** Stop background polling. */
+export async function monitorStopPolling(connectionId: string): Promise<void> {
+  return tauriInvoke<void>('monitor_stop_polling', { connectionId });
+}
+
+/** Fetch slow log entries (on demand). */
+export async function monitorSlowLog(
+  connectionId: string,
+  count: number = 50,
+): Promise<SlowLogEntry[]> {
+  return tauriInvoke<SlowLogEntry[]>('monitor_slow_log', { connectionId, count });
+}
+
+/** Fetch the connected client list (on demand). */
+export async function monitorClientList(connectionId: string): Promise<MonitorClientInfo[]> {
+  return tauriInvoke<MonitorClientInfo[]>('monitor_client_list', { connectionId });
+}
+
+/** Kill a connected client by ID. */
+export async function monitorKillClient(
+  connectionId: string,
+  clientId: number,
+): Promise<void> {
+  return tauriInvoke<void>('monitor_kill_client', { connectionId, clientId });
+}
+
+/** Fetch MEMORY STATS + MEMORY DOCTOR. */
+export async function monitorMemoryStats(connectionId: string): Promise<MemoryStats> {
+  return tauriInvoke<MemoryStats>('monitor_memory_stats', { connectionId });
+}
+
+// ─── CLI ────────────────────────────────────────────────────
+
+/** Execute a Redis command string. Set force=true to bypass dangerous command warnings. */
+export async function cliExecute(
+  connectionId: string,
+  command: string,
+  force: boolean = false,
+): Promise<ExecuteResponse> {
+  return tauriInvoke<ExecuteResponse>('cli_execute', { connectionId, command, force });
+}
+
+/** Get command suggestions matching a prefix (for autocomplete). */
+export async function cliGetCommandSuggestions(
+  prefix: string,
+): Promise<CommandSuggestion[]> {
+  return tauriInvoke<CommandSuggestion[]>('cli_get_command_suggestions', { prefix });
+}
+
+/** Get command history for a connection. */
+export async function cliGetCommandHistory(
+  connectionId: string,
+  limit: number = 100,
+): Promise<CliHistoryEntry[]> {
+  return tauriInvoke<CliHistoryEntry[]>('cli_get_command_history', { connectionId, limit });
+}
+
+// ─── Pub/Sub ────────────────────────────────────────────────
+
+/** Subscribe to one or more literal channels. Returns a subscription ID. */
+export async function pubsubSubscribe(
+  connectionId: string,
+  channels: string[],
+): Promise<string> {
+  return tauriInvoke<string>('pubsub_subscribe', { connectionId, channels });
+}
+
+/** Subscribe to one or more channel patterns. Returns a subscription ID. */
+export async function pubsubPsubscribe(
+  connectionId: string,
+  patterns: string[],
+): Promise<string> {
+  return tauriInvoke<string>('pubsub_psubscribe', { connectionId, patterns });
+}
+
+/** Unsubscribe from a subscription by ID. */
+export async function pubsubUnsubscribe(subscriptionId: string): Promise<void> {
+  return tauriInvoke<void>('pubsub_unsubscribe', { subscriptionId });
+}
+
+/** Publish a message to a channel. Returns the number of subscribers that received it. */
+export async function pubsubPublish(
+  connectionId: string,
+  channel: string,
+  message: string,
+): Promise<number> {
+  return tauriInvoke<number>('pubsub_publish', { connectionId, channel, message });
+}
+
+/** Get active channels with subscriber counts. */
+export async function pubsubGetActiveChannels(
+  connectionId: string,
+  pattern?: string,
+): Promise<ChannelInfo[]> {
+  return tauriInvoke<ChannelInfo[]>('pubsub_get_active_channels', { connectionId, pattern });
 }

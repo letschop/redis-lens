@@ -163,6 +163,15 @@ impl ConnectionManager {
         Ok(summary)
     }
 
+    /// Get the connection URL for a connected profile (used by `PubSub` for dedicated connections).
+    pub async fn get_connection_url(&self, id: &Uuid) -> Result<String, AppError> {
+        let conns = self.connections.read().await;
+        conns
+            .get(id)
+            .map(|c| build_connection_url(&c.profile))
+            .ok_or_else(|| AppError::Connection("Not connected".into()))
+    }
+
     /// Disconnect a connection, removing it from the manager.
     pub async fn disconnect(&self, id: &Uuid) {
         let mut conns = self.connections.write().await;

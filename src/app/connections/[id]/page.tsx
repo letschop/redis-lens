@@ -3,7 +3,18 @@
 
 import { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Database, Server, HardDrive, Users, MemoryStick } from 'lucide-react';
+import Link from 'next/link';
+import {
+  ArrowLeft,
+  Database,
+  Server,
+  HardDrive,
+  Users,
+  MemoryStick,
+  Terminal,
+  Radio,
+  Activity,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -115,6 +126,35 @@ export default function ConnectionDetailPage({ params }: PageProps) {
             {profile.host}:{profile.port}
           </p>
         </div>
+
+        {/* Navigation tabs */}
+        <nav className="flex items-center gap-1 ml-6">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-accent text-accent-foreground">
+            <HardDrive className="h-3 w-3" />
+            Keys
+          </span>
+          <Link
+            href={`/connections/${id}/monitor`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <Activity className="h-3 w-3" />
+            Monitor
+          </Link>
+          <Link
+            href={`/connections/${id}/cli`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <Terminal className="h-3 w-3" />
+            CLI
+          </Link>
+          <Link
+            href={`/connections/${id}/pubsub`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <Radio className="h-3 w-3" />
+            Pub/Sub
+          </Link>
+        </nav>
 
         {/* Server info badges */}
         {serverInfo && (

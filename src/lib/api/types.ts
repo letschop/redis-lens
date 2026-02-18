@@ -306,6 +306,148 @@ export interface GeoMember {
 
 // ─── Default Factories ─────────────────────────────────────────
 
+// ─── Monitor Types ───────────────────────────────────────────
+
+export interface ServerInfo {
+  server: ServerSection;
+  clients: ClientsSection;
+  memory: MemorySection;
+  stats: StatsSection;
+  replication: ReplicationSection;
+  keyspace: DatabaseInfo[];
+  raw: Record<string, string>;
+}
+
+export interface ServerSection {
+  redisVersion: string;
+  redisMode: string;
+  os: string;
+  uptimeInSeconds: number;
+  tcpPort: number;
+}
+
+export interface ClientsSection {
+  connectedClients: number;
+  blockedClients: number;
+  connectedSlaves: number;
+}
+
+export interface MemorySection {
+  usedMemory: number;
+  usedMemoryHuman: string;
+  usedMemoryRss: number;
+  usedMemoryPeakHuman: string;
+  maxmemory: number;
+  maxmemoryHuman: string;
+  memFragmentationRatio: number;
+}
+
+export interface StatsSection {
+  instantaneousOpsPerSec: number;
+  totalCommandsProcessed: number;
+  keyspaceHits: number;
+  keyspaceMisses: number;
+  expiredKeys: number;
+  evictedKeys: number;
+}
+
+export interface ReplicationSection {
+  role: string;
+  connectedSlaves: number;
+  masterReplOffset: number | null;
+}
+
+export interface DatabaseInfo {
+  index: number;
+  keys: number;
+  expires: number;
+  avgTtl: number;
+}
+
+export interface DerivedMetrics {
+  hitRatePercent: number;
+  memoryUsagePercent: number | null;
+  fragmentationHealth: 'good' | 'warning' | 'critical';
+}
+
+export interface StatsSnapshot {
+  timestampMs: number;
+  info: ServerInfo;
+  derived: DerivedMetrics;
+}
+
+export interface SlowLogEntry {
+  id: number;
+  timestamp: number;
+  durationUs: number;
+  command: string;
+  clientAddr: string;
+  clientName: string;
+}
+
+export interface MonitorClientInfo {
+  id: number;
+  addr: string;
+  age: number;
+  idle: number;
+  flags: string;
+  db: number;
+  cmd: string;
+  name: string;
+}
+
+export interface MemoryStats {
+  stats: Record<string, string>;
+  doctorAdvice: string;
+}
+
+// ─── CLI Types ──────────────────────────────────────────────
+
+export type CommandResult =
+  | { type: 'ok'; data: string }
+  | { type: 'integer'; data: number }
+  | { type: 'bulkString'; data: string }
+  | { type: 'array'; data: CommandResult[] }
+  | { type: 'error'; data: string }
+  | { type: 'nil' };
+
+export interface ExecuteResponse {
+  result: CommandResult;
+  durationMs: number;
+  command: string;
+}
+
+export interface CommandSuggestion {
+  command: string;
+  syntax: string;
+  summary: string;
+  group: string;
+}
+
+export interface CliHistoryEntry {
+  command: string;
+  timestampMs: number;
+  success: boolean;
+  durationMs: number;
+}
+
+// ─── Pub/Sub Types ──────────────────────────────────────────
+
+export interface PubSubMessage {
+  subscriptionId: string;
+  channel: string;
+  pattern: string | null;
+  payload: string;
+  timestampMs: number;
+}
+
+export interface ChannelInfo {
+  name: string;
+  subscribers: number;
+}
+
+// ─── Default Factories ─────────────────────────────────────────
+
 export function createDefaultProfile(
   overrides: Partial<ConnectionProfile> = {},
 ): ConnectionProfile {

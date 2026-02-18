@@ -12,6 +12,7 @@ pub mod redis;
 pub mod utils;
 
 use redis::connection::manager::ConnectionManager;
+use redis::monitor::poller::MonitorPoller;
 use tracing_subscriber::EnvFilter;
 
 /// Initialize the Tauri application.
@@ -32,6 +33,9 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .manage(ConnectionManager::new())
+        .manage(MonitorPoller::new())
+        .manage(commands::cli::CliHistory::new())
+        .manage(redis::pubsub::subscriber::PubSubManager::new())
         .invoke_handler(tauri::generate_handler![
             commands::health::health_check,
             commands::connection::connection_test,
@@ -100,6 +104,24 @@ pub fn run() {
             commands::editor::editor_get_ttl,
             commands::editor::editor_set_ttl,
             commands::editor::editor_persist_key,
+            // Monitor commands
+            commands::monitor::monitor_server_info,
+            commands::monitor::monitor_start_polling,
+            commands::monitor::monitor_stop_polling,
+            commands::monitor::monitor_slow_log,
+            commands::monitor::monitor_client_list,
+            commands::monitor::monitor_kill_client,
+            commands::monitor::monitor_memory_stats,
+            // CLI commands
+            commands::cli::cli_execute,
+            commands::cli::cli_get_command_suggestions,
+            commands::cli::cli_get_command_history,
+            // Pub/Sub commands
+            commands::pubsub::pubsub_subscribe,
+            commands::pubsub::pubsub_psubscribe,
+            commands::pubsub::pubsub_unsubscribe,
+            commands::pubsub::pubsub_publish,
+            commands::pubsub::pubsub_get_active_channels,
         ])
         .run(tauri::generate_context!())
         .expect("error while running RedisLens");

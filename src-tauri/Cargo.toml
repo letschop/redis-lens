@@ -34,5 +34,8 @@ deadpool-redis = "0.18"
 url = "2"
 percent-encoding = "2"
 
+# Async utilities
+futures = "0.3"
+
 # Encoding
 base64 = "0.22"
