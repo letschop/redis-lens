@@ -140,42 +140,49 @@ jobs:
         working-directory: src-tauri
         run: cargo test
 
-      - name: Import Apple certificate
+      - name: Check Apple certificate
         if: runner.os == 'macOS'
+        id: check-cert
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
           if [ -z "$APPLE_CERTIFICATE" ]; then
-            echo "::warning::No Apple certificate configured — skipping code signing"
+            echo "signing=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::No Apple certificate configured — building unsigned"
             exit 0
           fi
-          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
 
-          echo -n "$APPLE_CERTIFICATE" | base64 --decode -o "$CERTIFICATE_PATH"
+          CERT_PATH=$RUNNER_TEMP/test-cert.p12
+          echo -n "$APPLE_CERTIFICATE" | base64 --decode > "$CERT_PATH" 2>/dev/null
 
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" \
-            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: \
-            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          if [ ! -s "$CERT_PATH" ]; then
+            echo "signing=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Apple certificate decode failed — building unsigned"
+            rm -f "$CERT_PATH"
+            exit 0
+          fi
+
+          if openssl pkcs12 -in "$CERT_PATH" -nokeys -passin "pass:$APPLE_CERTIFICATE_PASSWORD" > /dev/null 2>&1; then
+            echo "signing=true" >> "$GITHUB_OUTPUT"
+            echo "Apple certificate is valid — code signing enabled"
+          else
+            echo "signing=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Apple certificate invalid or wrong password — building unsigned"
+          fi
+          rm -f "$CERT_PATH"
 
       - name: Build and upload to release
         if: ${{ !inputs.dry_run }}
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_CERTIFICATE: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE || '' }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
+          APPLE_SIGNING_IDENTITY: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_SIGNING_IDENTITY || '' }}
+          APPLE_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_ID || '' }}
+          APPLE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_TEAM_ID || '' }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: --target ${{ matrix.settings.target }}
@@ -185,22 +192,14 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_CERTIFICATE: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE || '' }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
+          APPLE_SIGNING_IDENTITY: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_SIGNING_IDENTITY || '' }}
+          APPLE_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_ID || '' }}
+          APPLE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_TEAM_ID || '' }}
         with:
           args: --target ${{ matrix.settings.target }}
-
-      - name: Clean up Apple keychain
-        if: runner.os == 'macOS' && always()
-        run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          if [ -f "$KEYCHAIN_PATH" ]; then
-            security delete-keychain "$KEYCHAIN_PATH"
-          fi
 
       - name: Upload artifacts (dry run)
         if: ${{ inputs.dry_run }}
