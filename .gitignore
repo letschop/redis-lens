@@ -99,6 +99,4 @@ temp/
 *.orig
 
 # ─── Claude Code ────────────────────────────────────────────────
-# Memory files are tracked (they contain project context)
-# But don't track user-specific settings overrides
-.claude/settings.local.json
+.claude/

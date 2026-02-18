@@ -4,6 +4,22 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 0.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run (build only, no release)'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: release-${{ github.ref }}
@@ -11,19 +27,34 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
+  RELEASE_VERSION: ${{ github.event.inputs.version || github.ref_name }}
 
 jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    if: ${{ !inputs.dry_run }}
     outputs:
       release_id: ${{ steps.create.outputs.result }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get version from tag
+      - name: Resolve version
         id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "tag=v${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create tag (manual dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          git tag "v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
 
       - name: Create GitHub Release
         id: create
@@ -33,10 +64,10 @@ jobs:
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: context.ref.replace('refs/tags/', ''),
+              tag_name: '${{ steps.version.outputs.tag }}',
               name: `RedisLens v${{ steps.version.outputs.version }}`,
               draft: true,
-              prerelease: false,
+              prerelease: ${{ inputs.prerelease || false }},
               generate_release_notes: true,
             });
             return data.id;
@@ -44,6 +75,7 @@ jobs:
   build-and-upload:
     name: Build (${{ matrix.settings.os }})
     needs: create-release
+    if: ${{ always() && (needs.create-release.result == 'success' || inputs.dry_run) }}
     strategy:
       fail-fast: false
       matrix:
@@ -105,7 +137,8 @@ jobs:
         working-directory: src-tauri
         run: cargo test
 
-      - name: Build Tauri app
+      - name: Build and upload to release
+        if: ${{ !inputs.dry_run }}
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -113,9 +146,29 @@ jobs:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: --target ${{ matrix.settings.target }}
 
+      - name: Build only (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target ${{ matrix.settings.target }}
+
+      - name: Upload artifacts (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.settings.label }}
+          path: |
+            src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.dmg
+            src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.AppImage
+            src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.deb
+            src-tauri/target/${{ matrix.settings.target }}/release/bundle/**/*.msi
+
   publish-release:
     name: Publish Release
     needs: [create-release, build-and-upload]
+    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     steps:
       - name: Publish release
