@@ -265,7 +265,7 @@ db1:keys=50,expires=5,avg_ttl=3000\r\n\
     fn test_parse_info_replication_section() {
         let info = parse_info(SAMPLE_INFO);
         assert_eq!(info.replication.role, "master");
-        assert_eq!(info.replication.master_repl_offset, Some(123456));
+        assert_eq!(info.replication.master_repl_offset, Some(123_456));
     }
 
     #[test]

@@ -36,6 +36,11 @@ percent-encoding = "2"
 
 # Async utilities
 futures = "0.3"
+async-trait = "0.1"
+
+# SSH tunneling
+russh = "0.46"
+russh-keys = "0.46"
 
 # Encoding
 base64 = "0.22"

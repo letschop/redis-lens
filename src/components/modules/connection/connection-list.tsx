@@ -51,6 +51,10 @@ export function ConnectionList() {
     }
   };
 
+  const handleEdit = (id: string) => {
+    router.push(`/connections/${id}/edit`);
+  };
+
   const handleSelect = (id: string) => {
     setActiveConnection(id);
     router.push(`/connections/${id}`);
@@ -92,6 +96,7 @@ export function ConnectionList() {
               state={states[profile.id]}
               onConnect={(id) => void handleConnect(id)}
               onDisconnect={(id) => void handleDisconnect(id)}
+              onEdit={handleEdit}
               onDelete={(id) => void handleDelete(id)}
               onSelect={handleSelect}
             />

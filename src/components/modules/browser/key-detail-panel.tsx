@@ -1,17 +1,23 @@
 // SPDX-License-Identifier: MIT
 'use client';
 
-import { Trash2, Copy } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Copy, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useBrowserStore } from '@/lib/stores/browser-store';
+import { browserRenameKey } from '@/lib/api/commands';
 import { EditorPanel } from '@/components/modules/editor/editor-panel';
 import { formatTtl, keyTypeColor, keyTypeLabel } from '@/lib/utils/tree-helpers';
 
 export function KeyDetailPanel() {
   const { selectedKey, selectedKeyInfo, deleteKeys } = useBrowserStore();
+  const [renaming, setRenaming] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [renameError, setRenameError] = useState<string | null>(null);
 
   if (!selectedKey) {
     return (
@@ -28,6 +34,38 @@ export function KeyDetailPanel() {
 
   const handleCopyKey = () => {
     void navigator.clipboard.writeText(selectedKey);
+  };
+
+  const handleStartRename = () => {
+    setRenaming(true);
+    setNewName(selectedKey);
+    setRenameError(null);
+  };
+
+  const handleCancelRename = () => {
+    setRenaming(false);
+    setNewName('');
+    setRenameError(null);
+  };
+
+  const handleRename = async () => {
+    if (!selectedKey || !newName.trim() || newName.trim() === selectedKey) {
+      handleCancelRename();
+      return;
+    }
+    const { connectionId } = useBrowserStore.getState();
+    if (!connectionId) return;
+    setRenameError(null);
+    try {
+      await browserRenameKey(connectionId, selectedKey, newName.trim());
+      const trimmedName = newName.trim();
+      setRenaming(false);
+      setNewName('');
+      await useBrowserStore.getState().refresh();
+      await useBrowserStore.getState().selectKey(trimmedName);
+    } catch (err) {
+      setRenameError(err instanceof Error ? err.message : String(err));
+    }
   };
 
   return (
@@ -117,8 +155,54 @@ export function KeyDetailPanel() {
           </div>
         )}
 
+        {/* Rename inline */}
+        {renaming && (
+          <div className="space-y-2">
+            <div className="flex gap-2 items-center">
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') void handleRename();
+                  if (e.key === 'Escape') handleCancelRename();
+                }}
+                className="h-7 text-xs font-mono"
+                autoFocus
+              />
+              <Button
+                size="sm"
+                variant="default"
+                className="text-xs h-7"
+                onClick={() => void handleRename()}
+              >
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs h-7"
+                onClick={handleCancelRename}
+              >
+                Cancel
+              </Button>
+            </div>
+            {renameError && (
+              <p className="text-xs text-destructive">{renameError}</p>
+            )}
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={handleStartRename}
+          >
+            <PenLine className="mr-1.5 h-3 w-3" />
+            Rename
+          </Button>
           <Button
             variant="outline"
             size="sm"

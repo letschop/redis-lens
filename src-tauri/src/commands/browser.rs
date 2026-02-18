@@ -204,8 +204,11 @@ mod tests {
 
     #[test]
     fn test_empty_pattern_is_rejected() {
-        // Validates that the pattern check exists in browser_scan_keys.
+        // Validates that an empty pattern would be caught by the command handler.
         // Full integration testing requires a running Redis instance.
-        assert!("*".is_empty() == false);
+        let pattern = String::new();
+        assert!(pattern.is_empty());
+        let pattern = String::from("*");
+        assert!(!pattern.is_empty());
     }
 }

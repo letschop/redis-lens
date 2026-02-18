@@ -2,6 +2,11 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Database, HardDrive, Activity, Terminal, Radio } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useConnectionStore } from '@/lib/stores/connection-store';
 import { useMonitorStore } from '@/lib/stores/monitor-store';
 import { MetricCard } from '@/components/modules/monitor/MetricCard';
 import { OpsChart } from '@/components/modules/monitor/OpsChart';
@@ -47,18 +52,63 @@ export default function MonitorPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional cleanup-only effect
   }, []);
 
+  const router = useRouter();
+  const { profiles } = useConnectionStore();
+  const profile = profiles.find((p) => p.id === connectionId);
   const totalKeys = latestInfo?.keyspace.reduce((sum, db) => sum + db.keys, 0) ?? 0;
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-auto p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Monitor Dashboard</h2>
-        <div className="flex items-center gap-2 text-sm">
+    <div className="flex h-screen flex-col">
+      {/* Navigation header */}
+      <div className="flex items-center gap-3 px-4 py-2 border-b shrink-0">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => router.push('/')}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
+          <Database className="h-3.5 w-3.5" />
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-sm font-semibold truncate">{profile?.name ?? 'Connection'}</h1>
+          <p className="text-xs text-muted-foreground">
+            {profile ? `${profile.host}:${profile.port}` : connectionId}
+          </p>
+        </div>
+
+        <nav className="flex items-center gap-1 ml-6">
+          <Link
+            href={`/connections/${connectionId}`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <HardDrive className="h-3 w-3" />
+            Keys
+          </Link>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-accent text-accent-foreground">
+            <Activity className="h-3 w-3" />
+            Monitor
+          </span>
+          <Link
+            href={`/connections/${connectionId}/cli`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <Terminal className="h-3 w-3" />
+            CLI
+          </Link>
+          <Link
+            href={`/connections/${connectionId}/pubsub`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <Radio className="h-3 w-3" />
+            Pub/Sub
+          </Link>
+        </nav>
+
+        <div className="flex items-center gap-2 text-sm ml-auto">
           <span className={`h-2 w-2 rounded-full ${polling ? 'bg-green-500' : 'bg-gray-400'}`} />
           <span className="text-muted-foreground">{polling ? '2s polling' : 'Stopped'}</span>
         </div>
       </div>
+
+      <div className="flex-1 overflow-auto p-4 space-y-4">
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -145,6 +195,7 @@ export default function MonitorPage({
             <p className="py-8 text-center text-sm text-muted-foreground">Waiting for data...</p>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

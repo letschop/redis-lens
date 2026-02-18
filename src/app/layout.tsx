@@ -4,6 +4,9 @@
 
 import '@/styles/globals.css';
 import { ThemeProvider } from '@/components/layout/theme-provider';
+import { ErrorBoundary } from '@/components/layout/error-boundary';
+import { Toaster } from '@/components/ui/sonner';
+import { CommandPalette } from '@/components/layout/command-palette';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,7 +22,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+          <CommandPalette />
+          <Toaster position="bottom-right" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

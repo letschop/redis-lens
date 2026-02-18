@@ -8,16 +8,19 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Loader2, XCircle, Link as LinkIcon } from 'lucide-react';
+import { CheckCircle, Loader2, XCircle, Link as LinkIcon, Shield } from 'lucide-react';
 import {
   createDefaultProfile,
   type ConnectionProfile,
+  type SshConfig,
+  type SshAuth,
   type ServerInfoSummary,
 } from '@/lib/api/types';
 import { useConnectionStore } from '@/lib/stores/connection-store';
 import { connectionParseUri } from '@/lib/api/commands';
 
 interface ConnectionFormProps {
+  initialProfile?: ConnectionProfile;
   onSaved?: (profile: ConnectionProfile) => void;
   onCancel?: () => void;
 }
@@ -28,8 +31,8 @@ type TestStatus =
   | { state: 'success'; info: ServerInfoSummary }
   | { state: 'error'; message: string };
 
-export function ConnectionForm({ onSaved, onCancel }: ConnectionFormProps) {
-  const [profile, setProfile] = useState<ConnectionProfile>(createDefaultProfile());
+export function ConnectionForm({ initialProfile, onSaved, onCancel }: ConnectionFormProps) {
+  const [profile, setProfile] = useState<ConnectionProfile>(initialProfile ?? createDefaultProfile());
   const [testStatus, setTestStatus] = useState<TestStatus>({ state: 'idle' });
   const [uriInput, setUriInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -217,6 +220,45 @@ export function ConnectionForm({ onSaved, onCancel }: ConnectionFormProps) {
             </Label>
           </div>
 
+          {/* SSH Tunnel Toggle */}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="ssh-enabled"
+              checked={profile.ssh?.enabled ?? false}
+              onChange={(e) => {
+                const enabled = e.target.checked;
+                setProfile((prev) => ({
+                  ...prev,
+                  ssh: enabled
+                    ? (prev.ssh ?? {
+                        enabled: true,
+                        host: '',
+                        port: 22,
+                        username: '',
+                        auth: { type: 'password' as const, password: '' },
+                      })
+                    : prev.ssh
+                      ? { ...prev.ssh, enabled: false }
+                      : undefined,
+                }));
+              }}
+              className="h-4 w-4 rounded border-border"
+            />
+            <Label htmlFor="ssh-enabled" className="font-normal flex items-center gap-1.5">
+              <Shield className="h-3.5 w-3.5" />
+              Use SSH Tunnel
+            </Label>
+          </div>
+
+          {/* SSH Configuration (shown when enabled) */}
+          {profile.ssh?.enabled && (
+            <SshConfigSection
+              ssh={profile.ssh}
+              onChange={(ssh) => setProfile((prev) => ({ ...prev, ssh }))}
+            />
+          )}
+
           {/* Read-only Toggle */}
           <div className="flex items-center gap-3">
             <input
@@ -288,6 +330,141 @@ export function ConnectionForm({ onSaved, onCancel }: ConnectionFormProps) {
           </Button>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── SSH Config Sub-Component ─────────────────────────────────────
+
+interface SshConfigSectionProps {
+  ssh: SshConfig;
+  onChange: (ssh: SshConfig) => void;
+}
+
+function SshConfigSection({ ssh, onChange }: SshConfigSectionProps) {
+  const updateSsh = <K extends keyof SshConfig>(key: K, value: SshConfig[K]) => {
+    onChange({ ...ssh, [key]: value });
+  };
+
+  const updateAuth = (auth: SshAuth) => {
+    onChange({ ...ssh, auth });
+  };
+
+  const authType = ssh.auth.type;
+
+  return (
+    <div className="space-y-4 rounded-md border border-border bg-muted/30 p-4">
+      {/* SSH Host + Port */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-2 space-y-2">
+          <Label htmlFor="ssh-host">SSH Host</Label>
+          <Input
+            id="ssh-host"
+            placeholder="bastion.example.com"
+            value={ssh.host}
+            onChange={(e) => updateSsh('host', e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="ssh-port">SSH Port</Label>
+          <Input
+            id="ssh-port"
+            type="number"
+            min={1}
+            max={65535}
+            value={ssh.port}
+            onChange={(e) => updateSsh('port', Number(e.target.value))}
+          />
+        </div>
+      </div>
+
+      {/* SSH Username */}
+      <div className="space-y-2">
+        <Label htmlFor="ssh-username">SSH Username</Label>
+        <Input
+          id="ssh-username"
+          placeholder="ubuntu"
+          value={ssh.username}
+          onChange={(e) => updateSsh('username', e.target.value)}
+        />
+      </div>
+
+      {/* Auth Method Selector */}
+      <div className="space-y-2">
+        <Label>Authentication Method</Label>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="ssh-auth-type"
+              value="password"
+              checked={authType === 'password'}
+              onChange={() => updateAuth({ type: 'password', password: '' })}
+              className="h-4 w-4"
+            />
+            Password
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="ssh-auth-type"
+              value="private_key"
+              checked={authType === 'private_key'}
+              onChange={() => updateAuth({ type: 'private_key', keyPath: '' })}
+              className="h-4 w-4"
+            />
+            Private Key
+          </label>
+        </div>
+      </div>
+
+      {/* Auth Fields */}
+      {authType === 'password' && (
+        <div className="space-y-2">
+          <Label htmlFor="ssh-password">SSH Password</Label>
+          <Input
+            id="ssh-password"
+            type="password"
+            value={ssh.auth.type === 'password' ? ssh.auth.password : ''}
+            onChange={(e) => updateAuth({ type: 'password', password: e.target.value })}
+          />
+        </div>
+      )}
+
+      {authType === 'private_key' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="ssh-key-path">Private Key Path</Label>
+            <Input
+              id="ssh-key-path"
+              placeholder="~/.ssh/id_rsa"
+              value={ssh.auth.type === 'private_key' ? ssh.auth.keyPath : ''}
+              onChange={(e) =>
+                updateAuth({
+                  type: 'private_key',
+                  keyPath: e.target.value,
+                  passphrase: ssh.auth.type === 'private_key' ? ssh.auth.passphrase : undefined,
+                })
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="ssh-passphrase">Passphrase (optional)</Label>
+            <Input
+              id="ssh-passphrase"
+              type="password"
+              value={ssh.auth.type === 'private_key' ? (ssh.auth.passphrase ?? '') : ''}
+              onChange={(e) =>
+                updateAuth({
+                  type: 'private_key',
+                  keyPath: ssh.auth.type === 'private_key' ? ssh.auth.keyPath : '',
+                  passphrase: e.target.value || undefined,
+                })
+              }
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

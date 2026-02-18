@@ -9,6 +9,7 @@ use tokio::sync::RwLock;
 use uuid::Uuid;
 
 use super::model::{ConnectionProfile, ConnectionState, ServerInfoSummary};
+use super::ssh_tunnel::SshTunnel;
 use super::uri::build_connection_url;
 use crate::utils::errors::AppError;
 
@@ -25,6 +26,8 @@ struct ActiveConnection {
     pub state: ConnectionState,
     #[allow(dead_code)]
     pub connected_at: chrono::DateTime<chrono::Utc>,
+    /// SSH tunnel, if one was established for this connection.
+    pub tunnel: Option<SshTunnel>,
 }
 
 impl Default for ConnectionManager {
@@ -68,7 +71,23 @@ impl ConnectionManager {
         // Disconnect existing connection for this profile if any
         self.disconnect(&id).await;
 
-        let pool = create_pool(&profile)?;
+        // Establish SSH tunnel if configured
+        let (effective_profile, tunnel) = if let Some(ref ssh) = profile.ssh {
+            if ssh.enabled {
+                let tunnel =
+                    super::ssh_tunnel::establish_tunnel(ssh, &profile.host, profile.port).await?;
+                let mut tunneled = profile.clone();
+                tunneled.host = "127.0.0.1".to_string();
+                tunneled.port = tunnel.local_port;
+                (tunneled, Some(tunnel))
+            } else {
+                (profile.clone(), None)
+            }
+        } else {
+            (profile.clone(), None)
+        };
+
+        let pool = create_pool(&effective_profile)?;
 
         // Verify the connection works by sending PING
         let mut conn = pool.get().await.map_err(|e| {
@@ -152,6 +171,7 @@ impl ConnectionManager {
             pool,
             state,
             connected_at: chrono::Utc::now(),
+            tunnel,
         };
 
         {
@@ -164,18 +184,32 @@ impl ConnectionManager {
     }
 
     /// Get the connection URL for a connected profile (used by `PubSub` for dedicated connections).
+    ///
+    /// When an SSH tunnel is active, returns a URL pointing at the local tunnel
+    /// port rather than the remote host.
     pub async fn get_connection_url(&self, id: &Uuid) -> Result<String, AppError> {
         let conns = self.connections.read().await;
-        conns
+        let active = conns
             .get(id)
-            .map(|c| build_connection_url(&c.profile))
-            .ok_or_else(|| AppError::Connection("Not connected".into()))
+            .ok_or_else(|| AppError::Connection("Not connected".into()))?;
+
+        if let Some(ref tunnel) = active.tunnel {
+            let mut tunneled = active.profile.clone();
+            tunneled.host = "127.0.0.1".to_string();
+            tunneled.port = tunnel.local_port;
+            Ok(build_connection_url(&tunneled))
+        } else {
+            Ok(build_connection_url(&active.profile))
+        }
     }
 
     /// Disconnect a connection, removing it from the manager.
     pub async fn disconnect(&self, id: &Uuid) {
         let mut conns = self.connections.write().await;
-        if conns.remove(id).is_some() {
+        if let Some(active) = conns.remove(id) {
+            if let Some(tunnel) = active.tunnel {
+                tunnel.shutdown();
+            }
             tracing::info!(id = %id, "Connection disconnected");
         }
     }
@@ -184,7 +218,11 @@ impl ConnectionManager {
     pub async fn disconnect_all(&self) {
         let mut conns = self.connections.write().await;
         let count = conns.len();
-        conns.clear();
+        for (_, active) in conns.drain() {
+            if let Some(tunnel) = active.tunnel {
+                tunnel.shutdown();
+            }
+        }
         if count > 0 {
             tracing::info!(count = count, "All connections disconnected");
         }
@@ -242,8 +280,28 @@ fn parse_server_info(raw: &str) -> HashMap<String, String> {
 }
 
 /// Test a connection by doing a quick PING, without storing it in the manager.
+///
+/// If SSH is configured and enabled, establishes a temporary tunnel for the test
+/// and tears it down when done.
 pub async fn test_connection(profile: &ConnectionProfile) -> Result<ServerInfoSummary, AppError> {
-    let url = build_connection_url(profile);
+    // Establish temporary SSH tunnel if needed
+    let (effective_profile, _tunnel) = if let Some(ref ssh) = profile.ssh {
+        if ssh.enabled {
+            let tunnel =
+                super::ssh_tunnel::establish_tunnel(ssh, &profile.host, profile.port).await?;
+            let mut tunneled = profile.clone();
+            tunneled.host = "127.0.0.1".to_string();
+            tunneled.port = tunnel.local_port;
+            (tunneled, Some(tunnel))
+        } else {
+            (profile.clone(), None)
+        }
+    } else {
+        (profile.clone(), None)
+    };
+    // _tunnel is dropped (and shut down) at the end of this function
+
+    let url = build_connection_url(&effective_profile);
 
     let client = redis::Client::open(url)
         .map_err(|e| AppError::Connection(format!("Failed to create client: {e}")))?;

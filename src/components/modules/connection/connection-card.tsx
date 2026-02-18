@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 'use client';
 
-import { Database, Plug, PlugZap, Trash2, AlertCircle } from 'lucide-react';
+import { Database, Pencil, Plug, PlugZap, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +12,7 @@ interface ConnectionCardProps {
   state?: ConnectionState;
   onConnect: (id: string) => void;
   onDisconnect: (id: string) => void;
+  onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onSelect: (id: string) => void;
 }
@@ -51,6 +52,7 @@ export function ConnectionCard({
   state,
   onConnect,
   onDisconnect,
+  onEdit,
   onDelete,
   onSelect,
 }: ConnectionCardProps) {
@@ -130,6 +132,15 @@ export function ConnectionCard({
               <Plug className="h-4 w-4" />
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(profile.id)}
+            disabled={isConnected || isConnecting}
+            title="Edit"
+          >
+            <Pencil className="h-4 w-4 text-muted-foreground" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
