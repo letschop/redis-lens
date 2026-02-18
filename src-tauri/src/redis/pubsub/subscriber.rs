@@ -4,9 +4,9 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
+use tauri::{AppHandle, Emitter};
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
-use tauri::{AppHandle, Emitter};
 
 use super::model::PubSubMessage;
 use crate::utils::errors::AppError;
@@ -55,17 +55,16 @@ impl PubSubManager {
         let client = redis::Client::open(connection_url)
             .map_err(|e| AppError::Connection(format!("Failed to create PubSub client: {e}")))?;
 
-        let mut pubsub = tokio::time::timeout(
-            Duration::from_secs(10),
-            client.get_async_pubsub(),
-        )
-        .await
-        .map_err(|_| AppError::Timeout("PubSub connection timed out".into()))?
-        .map_err(|e| AppError::Connection(format!("PubSub connection failed: {e}")))?;
+        let mut pubsub = tokio::time::timeout(Duration::from_secs(10), client.get_async_pubsub())
+            .await
+            .map_err(|_| AppError::Timeout("PubSub connection timed out".into()))?
+            .map_err(|e| AppError::Connection(format!("PubSub connection failed: {e}")))?;
 
         // Subscribe to all channels
         for ch in &channels {
-            pubsub.subscribe(ch).await
+            pubsub
+                .subscribe(ch)
+                .await
                 .map_err(|e| AppError::Redis(format!("Subscribe failed: {e}")))?;
         }
 
@@ -95,7 +94,10 @@ impl PubSubManager {
             task_handle,
         };
 
-        self.subscriptions.write().await.insert(sub_id.clone(), active);
+        self.subscriptions
+            .write()
+            .await
+            .insert(sub_id.clone(), active);
 
         tracing::info!(sub_id = %sub_id, channels = ?channels, "Subscribed");
         Ok(sub_id)
@@ -114,16 +116,15 @@ impl PubSubManager {
         let client = redis::Client::open(connection_url)
             .map_err(|e| AppError::Connection(format!("Failed to create PubSub client: {e}")))?;
 
-        let mut pubsub = tokio::time::timeout(
-            Duration::from_secs(10),
-            client.get_async_pubsub(),
-        )
-        .await
-        .map_err(|_| AppError::Timeout("PubSub connection timed out".into()))?
-        .map_err(|e| AppError::Connection(format!("PubSub connection failed: {e}")))?;
+        let mut pubsub = tokio::time::timeout(Duration::from_secs(10), client.get_async_pubsub())
+            .await
+            .map_err(|_| AppError::Timeout("PubSub connection timed out".into()))?
+            .map_err(|e| AppError::Connection(format!("PubSub connection failed: {e}")))?;
 
         for pat in &patterns {
-            pubsub.psubscribe(pat).await
+            pubsub
+                .psubscribe(pat)
+                .await
                 .map_err(|e| AppError::Redis(format!("Pattern subscribe failed: {e}")))?;
         }
 
@@ -156,7 +157,10 @@ impl PubSubManager {
             task_handle,
         };
 
-        self.subscriptions.write().await.insert(sub_id.clone(), active);
+        self.subscriptions
+            .write()
+            .await
+            .insert(sub_id.clone(), active);
 
         tracing::info!(sub_id = %sub_id, patterns = ?patterns, "Pattern subscribed");
         Ok(sub_id)

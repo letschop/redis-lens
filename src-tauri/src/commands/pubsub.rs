@@ -18,9 +18,7 @@ pub async fn pubsub_subscribe(
 ) -> Result<String, AppError> {
     let uuid = Uuid::parse_str(&connection_id)?;
     let url = manager.get_connection_url(&uuid).await?;
-    pubsub
-        .subscribe(connection_id, url, channels, app)
-        .await
+    pubsub.subscribe(connection_id, url, channels, app).await
 }
 
 /// Subscribe to pattern-matched channels. Returns a subscription ID.
@@ -34,9 +32,7 @@ pub async fn pubsub_psubscribe(
 ) -> Result<String, AppError> {
     let uuid = Uuid::parse_str(&connection_id)?;
     let url = manager.get_connection_url(&uuid).await?;
-    pubsub
-        .psubscribe(connection_id, url, patterns, app)
-        .await
+    pubsub.psubscribe(connection_id, url, patterns, app).await
 }
 
 /// Unsubscribe and tear down a subscription.

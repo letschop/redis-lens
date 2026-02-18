@@ -105,10 +105,7 @@ pub async fn establish_tunnel(
     authenticate(&mut session, ssh_config).await?;
 
     // Bind local listener
-    let bind_addr = format!(
-        "127.0.0.1:{}",
-        ssh_config.local_port.unwrap_or(0)
-    );
+    let bind_addr = format!("127.0.0.1:{}", ssh_config.local_port.unwrap_or(0));
     let listener = TcpListener::bind(&bind_addr)
         .await
         .map_err(|e| AppError::Connection(format!("Failed to bind local tunnel port: {e}")))?;

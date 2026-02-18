@@ -7,7 +7,11 @@ use tauri::State;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
-use crate::redis::cli::{executor, model::{CommandSuggestion, ExecuteResponse, HistoryEntry}, suggestions};
+use crate::redis::cli::{
+    executor,
+    model::{CommandSuggestion, ExecuteResponse, HistoryEntry},
+    suggestions,
+};
 use crate::redis::connection::manager::ConnectionManager;
 use crate::utils::errors::AppError;
 

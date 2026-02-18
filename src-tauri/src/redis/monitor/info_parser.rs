@@ -49,9 +49,7 @@ pub fn parse_info(raw: &str) -> ServerInfo {
     let replication = ReplicationSection {
         role: get_str(&map, "role"),
         connected_slaves: get_u64(&map, "connected_slaves"),
-        master_repl_offset: map
-            .get("master_repl_offset")
-            .and_then(|v| v.parse().ok()),
+        master_repl_offset: map.get("master_repl_offset").and_then(|v| v.parse().ok()),
     };
 
     let keyspace = parse_keyspace(&map);

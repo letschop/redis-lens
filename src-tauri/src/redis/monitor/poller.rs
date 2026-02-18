@@ -104,10 +104,7 @@ impl MonitorPoller {
 /// Fetch INFO ALL and build a `StatsSnapshot`.
 async fn fetch_info_all(pool: &Pool) -> Result<StatsSnapshot, AppError> {
     let mut conn = pool.get().await?;
-    let raw: String = redis::cmd("INFO")
-        .arg("ALL")
-        .query_async(&mut conn)
-        .await?;
+    let raw: String = redis::cmd("INFO").arg("ALL").query_async(&mut conn).await?;
 
     Ok(info_parser::build_snapshot(&raw))
 }

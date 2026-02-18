@@ -186,9 +186,7 @@ fn parse_ttl_value(value: Option<&redis::Value>) -> Ttl {
 fn extract_string_value(value: Option<&redis::Value>) -> Option<String> {
     match value {
         Some(redis::Value::SimpleString(s)) => Some(s.clone()),
-        Some(redis::Value::BulkString(bytes)) => {
-            Some(String::from_utf8_lossy(bytes).into_owned())
-        }
+        Some(redis::Value::BulkString(bytes)) => Some(String::from_utf8_lossy(bytes).into_owned()),
         _ => None,
     }
 }
@@ -209,11 +207,7 @@ async fn get_length_for_type(
         RedisKeyType::Unknown(_) => return None,
     };
 
-    redis::cmd(cmd)
-        .arg(key)
-        .query_async::<u64>(conn)
-        .await
-        .ok()
+    redis::cmd(cmd).arg(key).query_async::<u64>(conn).await.ok()
 }
 
 #[cfg(test)]
@@ -265,10 +259,7 @@ mod tests {
     #[test]
     fn test_extract_string_value_bulk() {
         let value = redis::Value::BulkString(b"listpack".to_vec());
-        assert_eq!(
-            extract_string_value(Some(&value)),
-            Some("listpack".into())
-        );
+        assert_eq!(extract_string_value(Some(&value)), Some("listpack".into()));
     }
 
     #[test]

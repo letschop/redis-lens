@@ -16,10 +16,7 @@ pub async fn monitor_server_info(
 ) -> Result<StatsSnapshot, AppError> {
     let pool = resolve_pool(&connection_id, &manager).await?;
     let mut conn = pool.get().await?;
-    let raw: String = redis::cmd("INFO")
-        .arg("ALL")
-        .query_async(&mut conn)
-        .await?;
+    let raw: String = redis::cmd("INFO").arg("ALL").query_async(&mut conn).await?;
     Ok(info_parser::build_snapshot(&raw))
 }
 

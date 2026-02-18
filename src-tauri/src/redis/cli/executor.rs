@@ -13,11 +13,7 @@ use crate::utils::errors::AppError;
 /// Parses the input into arguments, checks for dangerous commands (unless
 /// `force` is true), then executes via `redis::cmd()` and converts the
 /// response to a `CommandResult`.
-pub async fn execute(
-    pool: &Pool,
-    input: &str,
-    force: bool,
-) -> Result<ExecuteResponse, AppError> {
+pub async fn execute(pool: &Pool, input: &str, force: bool) -> Result<ExecuteResponse, AppError> {
     let args = parser::parse_command(input);
 
     if args.is_empty() {

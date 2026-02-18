@@ -73,14 +73,46 @@ pub fn parse_command(input: &str) -> Vec<String> {
 
 /// Dangerous commands and their warning levels/messages.
 static DANGEROUS_COMMANDS: &[(&str, DangerLevel, &str)] = &[
-    ("FLUSHALL", DangerLevel::Critical, "This will delete ALL keys in ALL databases. This cannot be undone."),
-    ("FLUSHDB", DangerLevel::Critical, "This will delete ALL keys in the current database. This cannot be undone."),
-    ("SHUTDOWN", DangerLevel::Critical, "This will shut down the Redis server."),
-    ("DEBUG", DangerLevel::Warning, "DEBUG commands can cause server instability."),
-    ("SWAPDB", DangerLevel::Warning, "This will swap two databases atomically."),
-    ("REPLICAOF", DangerLevel::Warning, "This will change the replication topology."),
-    ("SLAVEOF", DangerLevel::Warning, "This will change the replication topology."),
-    ("FAILOVER", DangerLevel::Warning, "This will trigger a replica failover."),
+    (
+        "FLUSHALL",
+        DangerLevel::Critical,
+        "This will delete ALL keys in ALL databases. This cannot be undone.",
+    ),
+    (
+        "FLUSHDB",
+        DangerLevel::Critical,
+        "This will delete ALL keys in the current database. This cannot be undone.",
+    ),
+    (
+        "SHUTDOWN",
+        DangerLevel::Critical,
+        "This will shut down the Redis server.",
+    ),
+    (
+        "DEBUG",
+        DangerLevel::Warning,
+        "DEBUG commands can cause server instability.",
+    ),
+    (
+        "SWAPDB",
+        DangerLevel::Warning,
+        "This will swap two databases atomically.",
+    ),
+    (
+        "REPLICAOF",
+        DangerLevel::Warning,
+        "This will change the replication topology.",
+    ),
+    (
+        "SLAVEOF",
+        DangerLevel::Warning,
+        "This will change the replication topology.",
+    ),
+    (
+        "FAILOVER",
+        DangerLevel::Warning,
+        "This will trigger a replica failover.",
+    ),
 ];
 
 /// Check if a command is dangerous. Returns a warning if so.
@@ -112,9 +144,19 @@ pub fn check_dangerous(args: &[String]) -> Option<DangerousWarning> {
     // Check CLUSTER write operations
     if cmd == "CLUSTER" && args.len() > 1 {
         let sub = args[1].to_uppercase();
-        let write_ops = ["ADDSLOTS", "DELSLOTS", "FAILOVER", "FORGET",
-                         "MEET", "REPLICATE", "RESET", "SAVECONFIG",
-                         "SET-CONFIG-EPOCH", "SETSLOT", "FLUSHSLOTS"];
+        let write_ops = [
+            "ADDSLOTS",
+            "DELSLOTS",
+            "FAILOVER",
+            "FORGET",
+            "MEET",
+            "REPLICATE",
+            "RESET",
+            "SAVECONFIG",
+            "SET-CONFIG-EPOCH",
+            "SETSLOT",
+            "FLUSHSLOTS",
+        ];
         if write_ops.contains(&sub.as_str()) {
             return Some(DangerousWarning {
                 command: args.join(" "),
@@ -200,7 +242,12 @@ mod tests {
 
     #[test]
     fn test_dangerous_config_set() {
-        let args = vec!["CONFIG".into(), "SET".into(), "maxmemory".into(), "100mb".into()];
+        let args = vec![
+            "CONFIG".into(),
+            "SET".into(),
+            "maxmemory".into(),
+            "100mb".into(),
+        ];
         let warning = check_dangerous(&args);
         assert!(warning.is_some());
         assert!(matches!(warning.unwrap().level, DangerLevel::Warning));

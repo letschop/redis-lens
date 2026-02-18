@@ -47,11 +47,7 @@ pub async fn scan_set_members(
 }
 
 /// Add one or more members to a set.
-pub async fn add_set_members(
-    pool: &Pool,
-    key: &str,
-    members: &[String],
-) -> Result<u64, AppError> {
+pub async fn add_set_members(pool: &Pool, key: &str, members: &[String]) -> Result<u64, AppError> {
     if members.is_empty() {
         return Ok(0);
     }

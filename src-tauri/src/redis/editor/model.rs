@@ -256,14 +256,8 @@ mod tests {
     fn test_list_position_serialization() {
         let head = ListPosition::Head;
         let tail = ListPosition::Tail;
-        assert_eq!(
-            serde_json::to_string(&head).expect("serialize"),
-            "\"head\""
-        );
-        assert_eq!(
-            serde_json::to_string(&tail).expect("serialize"),
-            "\"tail\""
-        );
+        assert_eq!(serde_json::to_string(&head).expect("serialize"), "\"head\"");
+        assert_eq!(serde_json::to_string(&tail).expect("serialize"), "\"tail\"");
     }
 
     #[test]

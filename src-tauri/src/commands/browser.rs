@@ -21,9 +21,7 @@ pub async fn browser_scan_keys(
     manager: State<'_, ConnectionManager>,
 ) -> Result<ScanResult, AppError> {
     if pattern.is_empty() {
-        return Err(AppError::InvalidInput(
-            "Pattern must not be empty".into(),
-        ));
+        return Err(AppError::InvalidInput("Pattern must not be empty".into()));
     }
 
     let uuid = Uuid::parse_str(&connection_id)?;
@@ -51,7 +49,11 @@ pub async fn browser_build_tree(
     keys: Vec<String>,
     delimiter: String,
 ) -> Result<Vec<KeyNode>, AppError> {
-    let delimiter = if delimiter.is_empty() { ":" } else { &delimiter };
+    let delimiter = if delimiter.is_empty() {
+        ":"
+    } else {
+        &delimiter
+    };
     let nodes = tree::build_key_tree(&keys, delimiter);
     Ok(nodes)
 }
@@ -66,7 +68,11 @@ pub async fn browser_get_children(
     delimiter: String,
     depth: u32,
 ) -> Result<Vec<KeyNode>, AppError> {
-    let delimiter = if delimiter.is_empty() { ":" } else { &delimiter };
+    let delimiter = if delimiter.is_empty() {
+        ":"
+    } else {
+        &delimiter
+    };
     let children = tree::get_children_for_prefix(&keys, &prefix, delimiter, depth);
     Ok(children)
 }
@@ -140,9 +146,7 @@ pub async fn browser_rename_key(
     manager: State<'_, ConnectionManager>,
 ) -> Result<(), AppError> {
     if old_name.is_empty() || new_name.is_empty() {
-        return Err(AppError::InvalidInput(
-            "Key names must not be empty".into(),
-        ));
+        return Err(AppError::InvalidInput("Key names must not be empty".into()));
     }
 
     let uuid = Uuid::parse_str(&connection_id)?;
