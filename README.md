@@ -1,6 +1,7 @@
 # RedisLens
 
-[![CI](https://github.com/redis-lens/redis-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/redis-lens/redis-lens/actions/workflows/ci.yml)
+[![CI](https://github.com/letschop/redis-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/letschop/redis-lens/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/letschop/redis-lens)](https://github.com/letschop/redis-lens/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A modern, open-source, cross-platform desktop Redis client built with Rust and Tauri. Think MongoDB Compass, but for Redis.
@@ -28,10 +29,9 @@ Download the latest release for your platform:
 
 | Platform | Download |
 |----------|----------|
-| macOS (Universal) | [RedisLens.dmg](https://github.com/redis-lens/redis-lens/releases/latest) |
-| Windows (x64) | [RedisLens.msi](https://github.com/redis-lens/redis-lens/releases/latest) |
-| Linux (x64) | [RedisLens.AppImage](https://github.com/redis-lens/redis-lens/releases/latest) |
-| Linux (Debian) | [RedisLens.deb](https://github.com/redis-lens/redis-lens/releases/latest) |
+| macOS (Apple Silicon) | [RedisLens.dmg](https://github.com/letschop/redis-lens/releases/latest) |
+| Windows (x64) | [RedisLens.exe](https://github.com/letschop/redis-lens/releases/latest) / [.msi](https://github.com/letschop/redis-lens/releases/latest) |
+| Linux (x64) | [RedisLens.AppImage](https://github.com/letschop/redis-lens/releases/latest) / [.deb](https://github.com/letschop/redis-lens/releases/latest) / [.rpm](https://github.com/letschop/redis-lens/releases/latest) |
 
 ### Build from Source
 
@@ -49,7 +49,7 @@ Download the latest release for your platform:
 
 ```bash
 # Clone the repository
-git clone https://github.com/redis-lens/redis-lens.git
+git clone https://github.com/letschop/redis-lens.git
 cd redis-lens
 
 # Install dependencies
