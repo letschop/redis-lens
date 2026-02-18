@@ -5,6 +5,7 @@
 import '@/styles/globals.css';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { ErrorBoundary } from '@/components/layout/error-boundary';
+import { PromoBanner } from '@/components/layout/promo-banner';
 import { Toaster } from '@/components/ui/sonner';
 import { CommandPalette } from '@/components/layout/command-palette';
 
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
+          <PromoBanner />
           <ErrorBoundary>
             {children}
           </ErrorBoundary>
