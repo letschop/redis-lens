@@ -172,17 +172,26 @@ jobs:
           fi
           rm -f "$CERT_PATH"
 
-      - name: Build and upload to release
-        if: ${{ !inputs.dry_run }}
+      - name: Build and upload (signed macOS)
+        if: ${{ !inputs.dry_run && steps.check-cert.outputs.signing == 'true' }}
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_CERTIFICATE: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE || '' }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
-          APPLE_SIGNING_IDENTITY: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_SIGNING_IDENTITY || '' }}
-          APPLE_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_ID || '' }}
-          APPLE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_TEAM_ID || '' }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          releaseId: ${{ needs.create-release.outputs.release_id }}
+          args: --target ${{ matrix.settings.target }}
+
+      - name: Build and upload (unsigned)
+        if: ${{ !inputs.dry_run && steps.check-cert.outputs.signing != 'true' }}
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: --target ${{ matrix.settings.target }}
@@ -192,12 +201,6 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_CERTIFICATE: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE || '' }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
-          APPLE_SIGNING_IDENTITY: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_SIGNING_IDENTITY || '' }}
-          APPLE_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_ID || '' }}
-          APPLE_PASSWORD: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ steps.check-cert.outputs.signing == 'true' && secrets.APPLE_TEAM_ID || '' }}
         with:
           args: --target ${{ matrix.settings.target }}
 
