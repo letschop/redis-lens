@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 
+const isProd = process.env.NODE_ENV === 'production';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Required for Tauri: serve as static files, no Node.js server
-  output: 'export',
+  // Static export only needed at build time (Tauri serves the output dir).
+  // In dev mode the Next.js server handles routing dynamically.
+  ...(isProd && { output: 'export' }),
 
   images: {
     unoptimized: true,
