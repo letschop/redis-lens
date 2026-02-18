@@ -5,6 +5,8 @@ All notable changes to RedisLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
 ## [0.1.0] - 2026-02-18
 
 ### Added
@@ -15,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Connection testing with server info display
 - Password storage via OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service)
 - Connection pooling with deadpool-redis (configurable pool size, timeouts)
+- Connection profile editing (edit existing profiles without re-creating)
+- Key rename from browser detail panel
 
 #### Key Browser
 - SCAN-based key enumeration (never uses `KEYS *`)
@@ -71,10 +75,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Infrastructure
 - Tauri 2.x desktop application (macOS, Windows, Linux)
-- 135 Rust unit tests + 1 doctest
-- 63 Tauri IPC commands
-- GitHub Actions CI (lint, test, build on all platforms)
-- Comprehensive Makefile with dev, test, lint, format, docker targets
+- Rust unit tests + doctests
+- 55 Tauri IPC commands
+- GitHub Actions CI (lint, typecheck, format, test on all platforms)
+- GitHub Actions Release workflow (multi-platform builds with tauri-action)
+- letschop.io promotional banner
 
 ---
 
