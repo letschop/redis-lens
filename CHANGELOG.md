@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-02-18
+
+### Fixed
+- Edit connection page shows raw RSC payload in production build — merged edit flow into new connection page using store-based state instead of separate route
+
 ## [0.1.1] - 2026-02-18
 
 ### Fixed

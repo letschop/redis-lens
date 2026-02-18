@@ -52,7 +52,8 @@ export function ConnectionList() {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/connections/edit?id=${id}`);
+    useConnectionStore.getState().setEditingProfileId(id);
+    router.push('/connections/new');
   };
 
   const handleSelect = (id: string) => {

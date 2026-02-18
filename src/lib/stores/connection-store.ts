@@ -14,6 +14,9 @@ interface ConnectionStore {
   /** Currently active (selected) connection ID. */
   activeConnectionId: string | null;
 
+  /** Profile ID being edited (navigates to /connections/new in edit mode). */
+  editingProfileId: string | null;
+
   /** Whether the initial load has completed. */
   loaded: boolean;
 
@@ -40,6 +43,9 @@ interface ConnectionStore {
   /** Set the active connection. */
   setActiveConnection: (id: string | null) => void;
 
+  /** Set the profile ID to edit (used by connection list → new page). */
+  setEditingProfileId: (id: string | null) => void;
+
   /** Update a connection's state (used by event listeners). */
   updateState: (id: string, state: ConnectionState) => void;
 }
@@ -48,6 +54,7 @@ export const useConnectionStore = create<ConnectionStore>()((set, _get) => ({
   profiles: [],
   states: {},
   activeConnectionId: null,
+  editingProfileId: null,
   loaded: false,
 
   loadProfiles: async () => {
@@ -108,6 +115,8 @@ export const useConnectionStore = create<ConnectionStore>()((set, _get) => ({
   },
 
   setActiveConnection: (id) => set({ activeConnectionId: id }),
+
+  setEditingProfileId: (id) => set({ editingProfileId: id }),
 
   updateState: (id, state) =>
     set((s) => ({
