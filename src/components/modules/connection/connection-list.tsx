@@ -52,12 +52,12 @@ export function ConnectionList() {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/connections/${id}/edit`);
+    router.push(`/connections/edit?id=${id}`);
   };
 
   const handleSelect = (id: string) => {
     setActiveConnection(id);
-    router.push(`/connections/${id}`);
+    router.push('/workspace');
   };
 
   if (!loaded) {

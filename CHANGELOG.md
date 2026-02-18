@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-02-18
+
+### Fixed
+- Release build disconnects when navigating to connections — replaced dynamic `[id]` routes with static `/workspace` page using state-based tabs (static export compatibility)
+
+### Changed
+- Mask hostnames and hide port numbers in connection cards and workspace header for privacy
+
 ## [0.1.0] - 2026-02-18
 
 ### Added

@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConnectionForm } from '@/components/modules/connection/connection-form';
 import { useConnectionStore } from '@/lib/stores/connection-store';
 
-export default function EditConnectionClient() {
+function EditConnectionContent() {
   const router = useRouter();
-  const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   const { profiles, loaded, loadProfiles } = useConnectionStore();
 
   useEffect(() => {
@@ -18,8 +19,6 @@ export default function EditConnectionClient() {
       void loadProfiles();
     }
   }, [loaded, loadProfiles]);
-
-  const profile = profiles.find((p) => p.id === params.id);
 
   if (!loaded) {
     return (
@@ -30,6 +29,8 @@ export default function EditConnectionClient() {
       </main>
     );
   }
+
+  const profile = id ? profiles.find((p) => p.id === id) : null;
 
   if (!profile) {
     return (
@@ -69,5 +70,21 @@ export default function EditConnectionClient() {
         onCancel={() => router.push('/')}
       />
     </main>
+  );
+}
+
+export default function EditConnectionPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="container max-w-3xl py-8 px-4 mx-auto">
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
+            Loading...
+          </div>
+        </main>
+      }
+    >
+      <EditConnectionContent />
+    </Suspense>
   );
 }

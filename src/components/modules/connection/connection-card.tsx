@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { ConnectionProfile, ConnectionState } from '@/lib/api/types';
+import { maskHost } from '@/lib/utils';
 
 interface ConnectionCardProps {
   profile: ConnectionProfile;
@@ -93,8 +94,7 @@ export function ConnectionCard({
             )}
           </div>
           <p className="text-sm text-muted-foreground truncate">
-            {profile.host}:{profile.port}
-            {profile.database > 0 ? ` / db${profile.database}` : ''}
+            {maskHost(profile.host)}
           </p>
           {state?.status === 'connected' && (
             <p className="text-xs text-muted-foreground mt-0.5">
