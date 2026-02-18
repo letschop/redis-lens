@@ -3,19 +3,27 @@
 import { invoke } from '@tauri-apps/api/core';
 import {
   AppError,
+  type BitmapInfo,
   type ConnectionProfile,
   type ConnectionState,
+  type GeoMember,
   type HashField,
   type HashScanResult,
   type HealthResponse,
+  type HllInfo,
+  type JsonValue,
   type KeyInfo,
   type KeyNode,
   type ListElement,
   type ScanResult,
   type ServerInfoSummary,
   type SetScanResult,
+  type StreamInfo,
+  type StreamRangeResult,
   type StringValue,
   type TtlInfo,
+  type ZSetMember,
+  type ZSetScanResult,
 } from './types';
 
 /**
@@ -312,6 +320,262 @@ export async function editorRemoveSetMembers(
   members: string[],
 ): Promise<number> {
   return tauriInvoke<number>('editor_remove_set_members', { connectionId, key, members });
+}
+
+// ─── Editor — Sorted Set ────────────────────────────────────────
+
+/** Get sorted set members by rank range, with scores. */
+export async function editorGetZsetRange(
+  connectionId: string,
+  key: string,
+  start: number,
+  stop: number,
+): Promise<ZSetMember[]> {
+  return tauriInvoke<ZSetMember[]>('editor_get_zset_range', { connectionId, key, start, stop });
+}
+
+/** Scan sorted set members with ZSCAN. */
+export async function editorScanZsetMembers(
+  connectionId: string,
+  key: string,
+  cursor: number,
+  pattern: string,
+  count: number,
+): Promise<ZSetScanResult> {
+  return tauriInvoke<ZSetScanResult>('editor_scan_zset_members', {
+    connectionId,
+    key,
+    cursor,
+    pattern,
+    count,
+  });
+}
+
+/** Add or update a sorted set member. Returns count of new members added. */
+export async function editorAddZsetMember(
+  connectionId: string,
+  key: string,
+  member: string,
+  score: number,
+): Promise<number> {
+  return tauriInvoke<number>('editor_add_zset_member', { connectionId, key, member, score });
+}
+
+/** Remove members from a sorted set. Returns count of removed. */
+export async function editorRemoveZsetMembers(
+  connectionId: string,
+  key: string,
+  members: string[],
+): Promise<number> {
+  return tauriInvoke<number>('editor_remove_zset_members', { connectionId, key, members });
+}
+
+/** Increment a member's score. Returns the new score. */
+export async function editorIncrZsetScore(
+  connectionId: string,
+  key: string,
+  member: string,
+  delta: number,
+): Promise<number> {
+  return tauriInvoke<number>('editor_incr_zset_score', { connectionId, key, member, delta });
+}
+
+/** Get sorted set cardinality. */
+export async function editorZsetCard(
+  connectionId: string,
+  key: string,
+): Promise<number> {
+  return tauriInvoke<number>('editor_zset_card', { connectionId, key });
+}
+
+// ─── Editor — Stream ────────────────────────────────────────────
+
+/** Get a range of stream entries (oldest first). */
+export async function editorGetStreamRange(
+  connectionId: string,
+  key: string,
+  start: string,
+  end: string,
+  count: number,
+): Promise<StreamRangeResult> {
+  return tauriInvoke<StreamRangeResult>('editor_get_stream_range', {
+    connectionId,
+    key,
+    start,
+    end,
+    count,
+  });
+}
+
+/** Get stream entries in reverse (newest first). */
+export async function editorGetStreamRangeRev(
+  connectionId: string,
+  key: string,
+  end: string,
+  start: string,
+  count: number,
+): Promise<StreamRangeResult> {
+  return tauriInvoke<StreamRangeResult>('editor_get_stream_range_rev', {
+    connectionId,
+    key,
+    end,
+    start,
+    count,
+  });
+}
+
+/** Add a stream entry. Returns the entry ID. */
+export async function editorAddStreamEntry(
+  connectionId: string,
+  key: string,
+  id: string,
+  fields: [string, string][],
+): Promise<string> {
+  return tauriInvoke<string>('editor_add_stream_entry', { connectionId, key, id, fields });
+}
+
+/** Delete stream entries by ID. */
+export async function editorDeleteStreamEntries(
+  connectionId: string,
+  key: string,
+  ids: string[],
+): Promise<number> {
+  return tauriInvoke<number>('editor_delete_stream_entries', { connectionId, key, ids });
+}
+
+/** Get stream info including consumer groups. */
+export async function editorGetStreamInfo(
+  connectionId: string,
+  key: string,
+): Promise<StreamInfo> {
+  return tauriInvoke<StreamInfo>('editor_get_stream_info', { connectionId, key });
+}
+
+// ─── Editor — JSON ──────────────────────────────────────────────
+
+/** Get a JSON value (tries RedisJSON module first). */
+export async function editorGetJsonValue(
+  connectionId: string,
+  key: string,
+  path: string,
+): Promise<JsonValue> {
+  return tauriInvoke<JsonValue>('editor_get_json_value', { connectionId, key, path });
+}
+
+/** Set a JSON value. */
+export async function editorSetJsonValue(
+  connectionId: string,
+  key: string,
+  path: string,
+  value: string,
+  useModule: boolean,
+): Promise<void> {
+  return tauriInvoke<void>('editor_set_json_value', {
+    connectionId,
+    key,
+    path,
+    value,
+    useModule,
+  });
+}
+
+// ─── Editor — HyperLogLog ──────────────────────────────────────
+
+/** Get HyperLogLog info. */
+export async function editorGetHllInfo(
+  connectionId: string,
+  key: string,
+): Promise<HllInfo> {
+  return tauriInvoke<HllInfo>('editor_get_hll_info', { connectionId, key });
+}
+
+/** Add elements to a HyperLogLog. Returns true if cardinality changed. */
+export async function editorAddHllElements(
+  connectionId: string,
+  key: string,
+  elements: string[],
+): Promise<boolean> {
+  return tauriInvoke<boolean>('editor_add_hll_elements', { connectionId, key, elements });
+}
+
+// ─── Editor — Bitmap ────────────────────────────────────────────
+
+/** Get bitmap info and a range of bits. */
+export async function editorGetBitmapInfo(
+  connectionId: string,
+  key: string,
+  byteOffset: number,
+  byteCount: number,
+): Promise<BitmapInfo> {
+  return tauriInvoke<BitmapInfo>('editor_get_bitmap_info', {
+    connectionId,
+    key,
+    byteOffset,
+    byteCount,
+  });
+}
+
+/** Set a single bit. Returns the old bit value. */
+export async function editorSetBitmapBit(
+  connectionId: string,
+  key: string,
+  offset: number,
+  value: number,
+): Promise<number> {
+  return tauriInvoke<number>('editor_set_bitmap_bit', { connectionId, key, offset, value });
+}
+
+// ─── Editor — Geospatial ───────────────────────────────────────
+
+/** Get all geospatial members with coordinates. */
+export async function editorGetGeoMembers(
+  connectionId: string,
+  key: string,
+): Promise<GeoMember[]> {
+  return tauriInvoke<GeoMember[]>('editor_get_geo_members', { connectionId, key });
+}
+
+/** Add a geospatial member. */
+export async function editorAddGeoMember(
+  connectionId: string,
+  key: string,
+  longitude: number,
+  latitude: number,
+  member: string,
+): Promise<number> {
+  return tauriInvoke<number>('editor_add_geo_member', {
+    connectionId,
+    key,
+    longitude,
+    latitude,
+    member,
+  });
+}
+
+/** Get distance between two members. */
+export async function editorGeoDistance(
+  connectionId: string,
+  key: string,
+  member1: string,
+  member2: string,
+  unit: string,
+): Promise<number | null> {
+  return tauriInvoke<number | null>('editor_geo_distance', {
+    connectionId,
+    key,
+    member1,
+    member2,
+    unit,
+  });
+}
+
+/** Remove geospatial members. */
+export async function editorRemoveGeoMembers(
+  connectionId: string,
+  key: string,
+  members: string[],
+): Promise<number> {
+  return tauriInvoke<number>('editor_remove_geo_members', { connectionId, key, members });
 }
 
 // ─── Editor — TTL ───────────────────────────────────────────────

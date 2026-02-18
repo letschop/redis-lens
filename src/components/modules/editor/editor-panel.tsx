@@ -9,6 +9,12 @@ import { StringEditor } from './string-editor';
 import { HashEditor } from './hash-editor';
 import { ListEditor } from './list-editor';
 import { SetEditor } from './set-editor';
+import { ZSetEditor } from './zset-editor';
+import { StreamEditor } from './stream-editor';
+import { JsonEditor } from './json-editor';
+import { HllViewer } from './hll-viewer';
+import { BitmapViewer } from './bitmap-viewer';
+import { GeoViewer } from './geo-viewer';
 import { TtlEditor } from './ttl-editor';
 
 export function EditorPanel() {
@@ -18,8 +24,11 @@ export function EditorPanel() {
   // Load editor value when key selection changes
   useEffect(() => {
     if (selectedKey && selectedKeyInfo && connectionId) {
-      const editable = ['string', 'hash', 'list', 'set'];
-      if (editable.includes(selectedKeyInfo.keyType)) {
+      const supported = [
+        'string', 'hash', 'list', 'set', 'zset', 'stream',
+        'ReJSON-RL', 'rejson-rl',
+      ];
+      if (supported.includes(selectedKeyInfo.keyType)) {
         void loadKey(
           connectionId,
           selectedKey,
@@ -40,8 +49,11 @@ export function EditorPanel() {
   }
 
   // Unsupported type
-  const editable = ['string', 'hash', 'list', 'set'];
-  if (!editable.includes(selectedKeyInfo.keyType)) {
+  const supported = [
+    'string', 'hash', 'list', 'set', 'zset', 'stream',
+    'ReJSON-RL', 'rejson-rl',
+  ];
+  if (!supported.includes(selectedKeyInfo.keyType)) {
     return (
       <div className="px-1 py-2 text-xs text-muted-foreground">
         Editor for &quot;{selectedKeyInfo.keyType}&quot; type is not yet supported.
@@ -82,6 +94,13 @@ export function EditorPanel() {
         {keyType === 'hash' && <HashEditor />}
         {keyType === 'list' && <ListEditor />}
         {keyType === 'set' && <SetEditor />}
+        {keyType === 'zset' && <ZSetEditor />}
+        {keyType === 'stream' && <StreamEditor />}
+        {(keyType === 'ReJSON-RL' || keyType === 'rejson-rl') && <JsonEditor />}
+        {value.type === 'hll' && <HllViewer />}
+        {value.type === 'bitmap' && <BitmapViewer />}
+        {value.type === 'geo' && <GeoViewer />}
+        {value.type === 'json' && keyType === 'string' && <JsonEditor />}
       </div>
 
       {/* Error toast */}

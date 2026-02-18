@@ -69,6 +69,33 @@ pub fn run() {
             commands::editor::editor_scan_set_members,
             commands::editor::editor_add_set_members,
             commands::editor::editor_remove_set_members,
+            // Editor commands — sorted set
+            commands::editor::editor_get_zset_range,
+            commands::editor::editor_scan_zset_members,
+            commands::editor::editor_add_zset_member,
+            commands::editor::editor_remove_zset_members,
+            commands::editor::editor_incr_zset_score,
+            commands::editor::editor_zset_card,
+            // Editor commands — stream
+            commands::editor::editor_get_stream_range,
+            commands::editor::editor_get_stream_range_rev,
+            commands::editor::editor_add_stream_entry,
+            commands::editor::editor_delete_stream_entries,
+            commands::editor::editor_get_stream_info,
+            // Editor commands — JSON
+            commands::editor::editor_get_json_value,
+            commands::editor::editor_set_json_value,
+            // Editor commands — HyperLogLog
+            commands::editor::editor_get_hll_info,
+            commands::editor::editor_add_hll_elements,
+            // Editor commands — bitmap
+            commands::editor::editor_get_bitmap_info,
+            commands::editor::editor_set_bitmap_bit,
+            // Editor commands — geospatial
+            commands::editor::editor_get_geo_members,
+            commands::editor::editor_add_geo_member,
+            commands::editor::editor_geo_distance,
+            commands::editor::editor_remove_geo_members,
             // Editor commands — TTL
             commands::editor::editor_get_ttl,
             commands::editor::editor_set_ttl,

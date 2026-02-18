@@ -223,6 +223,87 @@ export interface TtlInfo {
   isMissing: boolean;
 }
 
+// ─── Sorted Set Types ─────────────────────────────────────────
+
+/** A single member-score pair in a sorted set. */
+export interface ZSetMember {
+  member: string;
+  score: number;
+}
+
+/** Paginated result from ZSCAN. */
+export interface ZSetScanResult {
+  cursor: number;
+  members: ZSetMember[];
+  finished: boolean;
+}
+
+// ─── Stream Types ─────────────────────────────────────────────
+
+/** A single stream entry (ID + field-value pairs). */
+export interface StreamEntry {
+  id: string;
+  fields: [string, string][];
+}
+
+/** Result of reading a range of stream entries. */
+export interface StreamRangeResult {
+  entries: StreamEntry[];
+  totalLength: number;
+}
+
+/** Consumer group info from XINFO GROUPS. */
+export interface ConsumerGroupInfo {
+  name: string;
+  consumers: number;
+  pending: number;
+  lastDeliveredId: string;
+}
+
+/** Full stream info. */
+export interface StreamInfo {
+  length: number;
+  firstEntryId?: string;
+  lastEntryId?: string;
+  groups: ConsumerGroupInfo[];
+}
+
+// ─── JSON Type ────────────────────────────────────────────────
+
+/** JSON value from RedisJSON module or string fallback. */
+export interface JsonValue {
+  json: string;
+  isModule: boolean;
+}
+
+// ─── HyperLogLog Type ────────────────────────────────────────
+
+/** HyperLogLog information. */
+export interface HllInfo {
+  cardinality: number;
+  encoding: string;
+  sizeBytes: number;
+}
+
+// ─── Bitmap Type ──────────────────────────────────────────────
+
+/** Bitmap information and data. */
+export interface BitmapInfo {
+  bitCount: number;
+  byteLength: number;
+  bits: number[];
+  offset: number;
+}
+
+// ─── Geospatial Types ────────────────────────────────────────
+
+/** A single geospatial member with coordinates. */
+export interface GeoMember {
+  member: string;
+  longitude: number;
+  latitude: number;
+}
+
 // ─── Default Factories ─────────────────────────────────────────
 
 export function createDefaultProfile(

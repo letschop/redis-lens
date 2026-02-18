@@ -5,9 +5,12 @@ use uuid::Uuid;
 
 use crate::redis::connection::manager::ConnectionManager;
 use crate::redis::editor::model::{
-    HashField, HashScanResult, ListElement, SetScanResult, StringValue, TtlInfo,
+    BitmapInfo, GeoMember, HashField, HashScanResult, HllInfo, JsonValue, ListElement,
+    SetScanResult, StreamInfo, StreamRangeResult, StringValue, TtlInfo, ZSetMember, ZSetScanResult,
 };
-use crate::redis::editor::{hash_ops, list_ops, set_ops, string_ops, ttl_ops};
+use crate::redis::editor::{
+    hash_ops, list_ops, set_ops, special_ops, stream_ops, string_ops, ttl_ops, zset_ops,
+};
 use crate::utils::errors::AppError;
 
 // ---------------------------------------------------------------------------
@@ -295,6 +298,335 @@ pub async fn editor_persist_key(
     let result = ttl_ops::persist_key(&pool, &key).await?;
     tracing::info!(connection_id = %connection_id, key = %key, "Key persisted (TTL removed)");
     Ok(result)
+}
+
+// ---------------------------------------------------------------------------
+// Sorted Set commands
+// ---------------------------------------------------------------------------
+
+/// Get sorted set members by rank range, with scores.
+#[tauri::command]
+pub async fn editor_get_zset_range(
+    connection_id: String,
+    key: String,
+    start: i64,
+    stop: i64,
+    manager: State<'_, ConnectionManager>,
+) -> Result<Vec<ZSetMember>, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    zset_ops::get_zset_range(&pool, &key, start, stop).await
+}
+
+/// Scan sorted set members with ZSCAN (for large sorted sets).
+#[tauri::command]
+pub async fn editor_scan_zset_members(
+    connection_id: String,
+    key: String,
+    cursor: u64,
+    pattern: String,
+    count: u32,
+    manager: State<'_, ConnectionManager>,
+) -> Result<ZSetScanResult, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    zset_ops::scan_zset_members(&pool, &key, cursor, &pattern, count).await
+}
+
+/// Add or update a member in a sorted set.
+#[tauri::command]
+pub async fn editor_add_zset_member(
+    connection_id: String,
+    key: String,
+    member: String,
+    score: f64,
+    manager: State<'_, ConnectionManager>,
+) -> Result<u64, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let added = zset_ops::add_zset_member(&pool, &key, &member, score).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, member = %member, "ZSet member added");
+    Ok(added)
+}
+
+/// Remove one or more members from a sorted set.
+#[tauri::command]
+pub async fn editor_remove_zset_members(
+    connection_id: String,
+    key: String,
+    members: Vec<String>,
+    manager: State<'_, ConnectionManager>,
+) -> Result<u64, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let removed = zset_ops::remove_zset_members(&pool, &key, &members).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, removed = removed, "ZSet members removed");
+    Ok(removed)
+}
+
+/// Increment a member's score by a delta.
+#[tauri::command]
+pub async fn editor_incr_zset_score(
+    connection_id: String,
+    key: String,
+    member: String,
+    delta: f64,
+    manager: State<'_, ConnectionManager>,
+) -> Result<f64, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    zset_ops::incr_zset_score(&pool, &key, &member, delta).await
+}
+
+/// Get the cardinality of a sorted set.
+#[tauri::command]
+pub async fn editor_zset_card(
+    connection_id: String,
+    key: String,
+    manager: State<'_, ConnectionManager>,
+) -> Result<u64, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    zset_ops::zset_card(&pool, &key).await
+}
+
+// ---------------------------------------------------------------------------
+// Stream commands
+// ---------------------------------------------------------------------------
+
+/// Get a range of stream entries (oldest first).
+#[tauri::command]
+pub async fn editor_get_stream_range(
+    connection_id: String,
+    key: String,
+    start: String,
+    end: String,
+    count: u64,
+    manager: State<'_, ConnectionManager>,
+) -> Result<StreamRangeResult, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    stream_ops::get_stream_range(&pool, &key, &start, &end, count).await
+}
+
+/// Get a range of stream entries (newest first).
+#[tauri::command]
+pub async fn editor_get_stream_range_rev(
+    connection_id: String,
+    key: String,
+    end: String,
+    start: String,
+    count: u64,
+    manager: State<'_, ConnectionManager>,
+) -> Result<StreamRangeResult, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    stream_ops::get_stream_range_rev(&pool, &key, &end, &start, count).await
+}
+
+/// Add an entry to a stream.
+#[tauri::command]
+pub async fn editor_add_stream_entry(
+    connection_id: String,
+    key: String,
+    id: String,
+    fields: Vec<(String, String)>,
+    manager: State<'_, ConnectionManager>,
+) -> Result<String, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let entry_id = stream_ops::add_stream_entry(&pool, &key, &id, &fields).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, entry_id = %entry_id, "Stream entry added");
+    Ok(entry_id)
+}
+
+/// Delete entries from a stream.
+#[tauri::command]
+pub async fn editor_delete_stream_entries(
+    connection_id: String,
+    key: String,
+    ids: Vec<String>,
+    manager: State<'_, ConnectionManager>,
+) -> Result<u64, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let deleted = stream_ops::delete_stream_entries(&pool, &key, &ids).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, deleted = deleted, "Stream entries deleted");
+    Ok(deleted)
+}
+
+/// Get stream info including consumer groups.
+#[tauri::command]
+pub async fn editor_get_stream_info(
+    connection_id: String,
+    key: String,
+    manager: State<'_, ConnectionManager>,
+) -> Result<StreamInfo, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    stream_ops::get_stream_info(&pool, &key).await
+}
+
+// ---------------------------------------------------------------------------
+// JSON commands
+// ---------------------------------------------------------------------------
+
+/// Get a JSON value (tries `RedisJSON` module first, falls back to GET).
+#[tauri::command]
+pub async fn editor_get_json_value(
+    connection_id: String,
+    key: String,
+    path: String,
+    manager: State<'_, ConnectionManager>,
+) -> Result<JsonValue, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    special_ops::get_json_value(&pool, &key, &path).await
+}
+
+/// Set a JSON value (uses `RedisJSON` module or plain SET).
+#[tauri::command]
+pub async fn editor_set_json_value(
+    connection_id: String,
+    key: String,
+    path: String,
+    value: String,
+    use_module: bool,
+    manager: State<'_, ConnectionManager>,
+) -> Result<(), AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    special_ops::set_json_value(&pool, &key, &path, &value, use_module).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, "JSON value set");
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// HyperLogLog commands
+// ---------------------------------------------------------------------------
+
+/// Get `HyperLogLog` info (cardinality, encoding, size).
+#[tauri::command]
+pub async fn editor_get_hll_info(
+    connection_id: String,
+    key: String,
+    manager: State<'_, ConnectionManager>,
+) -> Result<HllInfo, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    special_ops::get_hll_info(&pool, &key).await
+}
+
+/// Add elements to a `HyperLogLog`.
+#[tauri::command]
+pub async fn editor_add_hll_elements(
+    connection_id: String,
+    key: String,
+    elements: Vec<String>,
+    manager: State<'_, ConnectionManager>,
+) -> Result<bool, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let changed = special_ops::add_hll_elements(&pool, &key, &elements).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, "HLL elements added");
+    Ok(changed)
+}
+
+// ---------------------------------------------------------------------------
+// Bitmap commands
+// ---------------------------------------------------------------------------
+
+/// Get bitmap info and a range of bits.
+#[tauri::command]
+pub async fn editor_get_bitmap_info(
+    connection_id: String,
+    key: String,
+    byte_offset: u64,
+    byte_count: u64,
+    manager: State<'_, ConnectionManager>,
+) -> Result<BitmapInfo, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    special_ops::get_bitmap_info(&pool, &key, byte_offset, byte_count).await
+}
+
+/// Set a single bit in a bitmap.
+#[tauri::command]
+pub async fn editor_set_bitmap_bit(
+    connection_id: String,
+    key: String,
+    offset: u64,
+    value: u8,
+    manager: State<'_, ConnectionManager>,
+) -> Result<u8, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let old = special_ops::set_bitmap_bit(&pool, &key, offset, value).await?;
+    tracing::debug!(connection_id = %connection_id, key = %key, offset = offset, "Bit set");
+    Ok(old)
+}
+
+// ---------------------------------------------------------------------------
+// Geospatial commands
+// ---------------------------------------------------------------------------
+
+/// Get all geospatial members with their coordinates.
+#[tauri::command]
+pub async fn editor_get_geo_members(
+    connection_id: String,
+    key: String,
+    manager: State<'_, ConnectionManager>,
+) -> Result<Vec<GeoMember>, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    special_ops::get_geo_members(&pool, &key).await
+}
+
+/// Add a geospatial member.
+#[tauri::command]
+pub async fn editor_add_geo_member(
+    connection_id: String,
+    key: String,
+    longitude: f64,
+    latitude: f64,
+    member: String,
+    manager: State<'_, ConnectionManager>,
+) -> Result<u64, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let added = special_ops::add_geo_member(&pool, &key, longitude, latitude, &member).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, member = %member, "Geo member added");
+    Ok(added)
+}
+
+/// Get distance between two geospatial members.
+#[tauri::command]
+pub async fn editor_geo_distance(
+    connection_id: String,
+    key: String,
+    member1: String,
+    member2: String,
+    unit: String,
+    manager: State<'_, ConnectionManager>,
+) -> Result<Option<f64>, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    special_ops::geo_distance(&pool, &key, &member1, &member2, &unit).await
+}
+
+/// Remove geospatial members.
+#[tauri::command]
+pub async fn editor_remove_geo_members(
+    connection_id: String,
+    key: String,
+    members: Vec<String>,
+    manager: State<'_, ConnectionManager>,
+) -> Result<u64, AppError> {
+    validate_key(&key)?;
+    let pool = resolve_pool(&connection_id, &manager).await?;
+    let removed = special_ops::remove_geo_members(&pool, &key, &members).await?;
+    tracing::info!(connection_id = %connection_id, key = %key, removed = removed, "Geo members removed");
+    Ok(removed)
 }
 
 // ---------------------------------------------------------------------------
