@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-02-18
+
+### Fixed
+- Production build shows raw RSC flight data instead of rendered UI — added `'unsafe-inline'` to `script-src` and `'self'` to `connect-src` in CSP so Next.js inline hydration scripts and client-side navigation fetches are no longer blocked
+- Added `trailingSlash: true` to Next.js config so Tauri's static file server correctly resolves page routes to `index.html`
+
 ## [0.1.2] - 2026-02-18
 
 ### Fixed

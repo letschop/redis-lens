@@ -8,6 +8,10 @@ const nextConfig = {
   // In dev mode the Next.js server handles routing dynamically.
   ...(isProd && { output: 'export' }),
 
+  // Produce /page/index.html instead of /page.html — Tauri's static file
+  // server resolves directory paths to index.html automatically.
+  trailingSlash: true,
+
   images: {
     unoptimized: true,
   },
